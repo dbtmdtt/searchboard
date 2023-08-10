@@ -22,7 +22,8 @@ public class SearchController {
     @GetMapping("/")
     public String searchMain(Model model) {
         MoisDto searchResults = searchService.mapSearchResults();
-        model.addAttribute("searchResult", searchResults);
+        model.addAttribute("photoResult", searchResults.getMoisPhotoDto());
+        model.addAttribute("attachResult", searchResults.getMoisAttachDto());
         return "searchMain";
     }
 }

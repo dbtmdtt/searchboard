@@ -11,7 +11,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
+
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,6 @@ public class SearchService {
                 attachResult.setWriter((String) attachMap.get("writer"));
                 attachResult.setWriteDate((String) attachMap.get("write_date"));
                 attachResult.setDomain((String) attachMap.get("domain"));
-
 
                 attachResults.add(attachResult);
             }

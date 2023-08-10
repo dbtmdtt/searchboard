@@ -46,17 +46,32 @@
             <div>사람들</div>
 
         </div>
+        <div style="margin: 30px auto; width:60%;">
+            <h4>보도자료</h4>
+            <ul>
+                <li th:each="attach : ${attachResult}">
+                    <h5 th:text="${attach.title}" style="margin-top:20px"></h5>
+                    <p th:text="${attach.content}"></p>
+                    <div style="display:flex">
+                        <small th:text="${attach.writer}"></small>
+                        <small th:text="${attach.writeDate}" style="margin-left: 10px"></small>
+                    </div>
 
-    <ul>
-        <li th:each="attach : ${searchResult}">
-            <h2 th:text="${attach.title}" style="margin-top:20px"></h2>
-            <p th:text="${attach.content}"></p>
-            <div style="display:flex">
-                <small th:text="${attach.writer}"></small>
-                <small th:text="${attach.writeDate}" style="margin-left: 10px"></small>
-            </div>
+                </li>
+            </ul>
+            <h4>사진자료</h4>
+            <ul>
+                <li th:each="photo : ${photoResult}">
+                    <h5 th:text="${photo.title}" style="margin-top:20px"></h5>
+                    <p th:text="${photo.content}"></p>
+                    <div style="display:flex">
+                        <small th:text="${photo.writer}"></small>
+                        <small th:text="${photo.writeDate}" style="margin-left: 10px"></small>
+                    </div>
 
-        </li>
-    </ul>
+                </li>
+            </ul>
+        </div>
+
 </body>
 </html>
