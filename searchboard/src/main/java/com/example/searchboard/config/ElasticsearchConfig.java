@@ -34,7 +34,6 @@ public class ElasticsearchConfig {
 
     @Bean
     public RestHighLevelClient elasticsearchClient() {
-        log.debug("ssss : {}", elasticsearchUris);
         String[] uriArr = elasticsearchUris.split(",");
         HttpHost[] httpHosts = new HttpHost[uriArr.length];
         for (int i = 0; i < uriArr.length; i++) {
