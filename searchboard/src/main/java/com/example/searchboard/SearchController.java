@@ -1,5 +1,7 @@
 package com.example.searchboard;
 
+import com.example.searchboard.domain.MoisDto;
+import com.example.searchboard.domain.Pagination;
 import com.example.searchboard.domain.SearchMainDto;
 import javassist.compiler.ast.Keyword;
 import lombok.extern.slf4j.Slf4j;
@@ -36,19 +38,29 @@ public class SearchController {
         model.addAttribute("categories", categories);
         model.addAttribute("yhnMain", mainList.getYhnMainList());
         model.addAttribute("moisMain", mainList.getMoisMainList());
-//        model.addAttribute("moisCount", mainList.getDomainMoisHitsCountMap());
-//        model.addAttribute("yhnCount", mainList.getDomainYhnHitsCountMap());
-//        log.debug("asdf:{}, {} ",mainList.getYhnMainList());
+        model.addAttribute("pagination",mainList.getPagination());
 
         return "searchMain";
     }
+
     @GetMapping("/moisAttach")
-    public String searchAttach(Model model, @RequestParam(required = false) String keyword,
-                             @RequestParam(required = false) List<String> searchCategory) throws IOException {
-        SearchMainDto mainList = searchService.mainList(keyword, searchCategory);
-        model.addAttribute("moisMain", mainList.getMoisMainList());
+    public String searchMoisAttach(Model model, @RequestParam(required = false) String keyword,
+                                   @RequestParam(required = false) List<String> searchCategory,
+                                   @RequestParam(required = false) String domain) throws IOException {
+
+        List<MoisDto> moisList = searchService.moisList(keyword, searchCategory, domain);
+        model.addAttribute("moisList", moisList);
         return "moisAttach";
     }
 
+    @GetMapping("/moisPhoto")
+    public String searchMoisPhoto(Model model, @RequestParam(required = false) String keyword,
+                                  @RequestParam(required = false) List<String> searchCategory) throws IOException {
+        SearchMainDto mainList = searchService.mainList(keyword, searchCategory);
+        model.addAttribute("moisMain", mainList.getMoisMainList());
+        model.addAttribute("pagination",mainList.getPagination());
+
+        return "moisPhoto";
+    }
 
 }

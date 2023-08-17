@@ -12,6 +12,8 @@ public class SearchMainDto {
     private List<MoisDto> moisMainList;
     private Map<String, Long> domainMoisHitsCountMap;
     private Map<String, Long> domainYhnHitsCountMap;
+    private Pagination pagination;
+
 
     public void setDomainMoisHitsCount(String domain, Long count) {
         if (domainMoisHitsCountMap == null) {

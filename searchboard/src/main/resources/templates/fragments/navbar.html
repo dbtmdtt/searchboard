@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous"/>
+    <link rel="icon" href="data:,">
+
+
+</head>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="navbar" style="margin : 0 auto;">
+    <ul class="nav-list" style=" list-style: none;
+        display: flex;
+        justify-content: center;
+        background-color: #81d4fa;
+        padding: 10px 0;
+        margin: 0;
+        border-top: 2px solid white;
+        border-bottom: 2px solid white;
+        font-size: large;
+        font-weight : bold;">
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">통합검색</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/moisAttach(keyword=${keyword}, searchCategory=${searchCategory}, domain='mois_attach')}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">보도자료</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/moisPhoto}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">사진자료</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnPolitics}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">정치</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnNorth}" onclick="showSection('yhnNorth')"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">북한</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnEconomy}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">경제</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnIndustry}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">산업</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnSocial}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">사회</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnKorea}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">전국</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnWorld}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">세계</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnCulture}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">문화</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnLife}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">라이프</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnEnter}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">연예</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnSports}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">스포츠</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnOpinion}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">오피니언</a>
+            <span class="separator" style="width: 1px; height: 20px; background-color: white; margin: 0 10px;"></span>
+        </li>
+        <li class="nav-item" style="display: flex; align-items: center;">
+            <a class="nav-link" th:href="@{/yhnPeople}"
+               style="color: white; text-decoration: none; margin: 0 10px; padding: 5px;">사람들</a>
+        </li>
+    </ul>
+</div>
+
+</html>

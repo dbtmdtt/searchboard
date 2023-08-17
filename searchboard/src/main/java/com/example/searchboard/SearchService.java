@@ -36,73 +36,106 @@ public class SearchService {
     }
 
     public SearchMainDto mainList(String keyword,List<String> searchCategory) throws IOException {
-        SearchRequest searchRequest_mois = new SearchRequest("mois_index");
-        SearchRequest searchRequest_yhn = new SearchRequest("yhn_index");
         String[] moisDomain = {"mois_photo", "mois_attach"};
         String[] yhnCategories = {"정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프", "연예", "스포츠", "오피니언", "사람들"};
+        SearchRequest searchRequest_mois = new SearchRequest("mois_index");
+        SearchRequest searchRequest_yhn = new SearchRequest("yhn_index");
         SearchMainDto resultDto = new SearchMainDto();
         SearchSourceBuilder commonSearchSourceBuilder = new SearchSourceBuilder();
         commonSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        if(keyword != null && !keyword.isEmpty()){
+
+        SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
+                .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                .trackTotalHits(true); // 개수 표시 위함
+
+        if(keyword != null && !keyword.isEmpty()) {
             //키워드가 있을경우 키워드로 검색
             resultDto.setMoisMainList(searchKeywordMois(keyword, moisDomain, searchCategory));
             resultDto.setYhnMainList(searchKeywordYhn(keyword, yhnCategories, searchCategory));
-            return resultDto;
 
         }else{
-            //키워드가 없을 경우
-            //메인페이지는 최신순 5개씩 불러온다
-            SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
-                    .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
-                    .trackTotalHits(true); // 개수 표시 위함
 
-            try {
+            List<MoisDto> moisMainList = getMoisMainList(searchRequest_mois, mainBuilder, moisDomain);
+            List<YhnDto> yhnMainList = getYhnMainList(searchRequest_yhn, mainBuilder, yhnCategories);
 
-                //메인 페이지 전체 기사 불러오기
-                List<SearchResponse> moisMain = new ArrayList<>();
-                List<SearchResponse> yhnMain = new ArrayList<>();
-                List<MoisDto> moisMainList = new ArrayList<>();
+            resultDto.setYhnMainList(yhnMainList);
+            resultDto.setMoisMainList(moisMainList);
+        }
+        return resultDto;
+    }
+    private List<MoisDto> getMoisMainList(SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder, String[] moisDomain) throws IOException {
+        List<MoisDto> moisMainList = new ArrayList<>();
 
-                for (String domain : moisDomain) {
-                    mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
-                    SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
-                    moisMain.add(moisResponse);
-
-                    long moisHitsCount = moisResponse.getHits().getTotalHits().value;
-                    resultDto.setDomainMoisHitsCount(domain, moisHitsCount);
-                }
-
-                for (SearchResponse moisResponse : moisMain) {
-                    moisMainList.addAll(moisList(moisResponse.getHits().getHits()));
-                }
-
-                for (String category : yhnCategories) {
-                    mainBuilder.query(QueryBuilders.matchQuery("category_one_depth", category));
-                    SearchResponse yhnResponse = client.search(searchRequest_yhn.source(mainBuilder), RequestOptions.DEFAULT);
-                    yhnMain.add(yhnResponse);
-                    long moisHitsCount = yhnResponse.getHits().getTotalHits().value;
-                    resultDto.setDomainYhnHitsCount(category, moisHitsCount);
-                }
-                List<YhnDto> yhnMainList = new ArrayList<>();
-
-                for (SearchResponse yhnResponse : yhnMain) {
-                    yhnMainList.addAll(yhnList(yhnResponse.getHits().getHits()));
-                }
-
-                resultDto.setYhnMainList(yhnMainList);
-                resultDto.setMoisMainList(moisMainList);
-
-                return resultDto;
-            } catch (IOException e) {
-                log.debug("ElasticsearchError!!!");
-            }
-
+        for (String domain : moisDomain) {
+            mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
+            SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
+            moisMainList.addAll(moisList(moisResponse.getHits().getHits()));
         }
 
-
-        return null;
+        return moisMainList;
     }
+    private List<YhnDto> getYhnMainList(SearchRequest searchRequest_yhn, SearchSourceBuilder mainBuilder, String[] yhnCategories) throws IOException {
+        List<YhnDto> yhnMainList = new ArrayList<>();
 
+        for (String category : yhnCategories) {
+            mainBuilder.query(QueryBuilders.matchQuery("category_one_depth", category));
+            SearchResponse yhnResponse = client.search(searchRequest_yhn.source(mainBuilder), RequestOptions.DEFAULT);
+            yhnMainList.addAll(yhnList(yhnResponse.getHits().getHits()));
+        }
+
+        return yhnMainList;
+    }
+    public List<MoisDto> moisList(String keyword, List<String> searchFields, String domain ) throws IOException {
+//        List<MoisDto> moisMain = new ArrayList<>();
+//        SearchRequest searchRequest_mois = new SearchRequest("mois_index");
+//        if(keyword != null && !keyword.isEmpty()) {
+//            //키워드가 있을경우 키워드로 검색
+//
+//
+//        }else {
+//            SearchSourceBuilder commonSearchSourceBuilder = new SearchSourceBuilder();
+//            commonSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
+//
+//            SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
+//                    .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+//                    .trackTotalHits(true); // 개수 표시 위함
+//            mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
+//            SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
+//            moisMain.addAll(moisList(moisResponse.getHits().getHits()));
+//
+//        }
+//        return moisMain;
+        List<MoisDto> moisMain = new ArrayList<>();
+        SearchRequest searchRequest_mois = new SearchRequest("mois_index");
+
+        SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
+                .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                .trackTotalHits(true); // 개수 표시 위함
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            // 키워드가 있을 경우 키워드로 검색
+            if (searchFields.contains("all")) {
+                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, "title", "content", "_file.content", "_file.nameOrg");
+                boolQuery.must(multiMatchQuery);
+            } else {
+                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, searchFields.toArray(new String[searchFields.size()]));
+                boolQuery.must(multiMatchQuery);
+            }
+        } else {
+            // 키워드가 없을 경우 domain으로 필터링
+            TermQueryBuilder termQuery = QueryBuilders.termQuery("domain", domain);
+            boolQuery.filter(termQuery);
+        }
+
+        mainBuilder.query(boolQuery);
+
+        SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
+        moisMain.addAll(moisList(moisResponse.getHits().getHits()));
+
+        return moisMain;
+    }
     public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
 
@@ -138,7 +171,7 @@ public class SearchService {
     }
     public List<YhnDto> searchKeywordYhn(String keyword, String[] categories, List<String> searchFields) throws IOException {
         List<YhnDto> YhnMain = new ArrayList<>();
-        log.debug("searchfields:{}", searchFields);
+        log.debug("searchfields:{}", keyword);
 
         for (String category : categories) {
             SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
@@ -152,8 +185,6 @@ public class SearchService {
             } else {
                 // Create a multi-match query for the given keyword and specific fields
                 MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, searchFields.toArray(new String[searchFields.size()]));
-                log.debug("size:{}", searchFields.size());
-                log.debug("fileds:{}", searchFields.toArray(new String[searchFields.size()]));
                 boolQuery.must(multiMatchQuery);
             }
 
@@ -162,16 +193,18 @@ public class SearchService {
             boolQuery.filter(termQuery);
 
             mainBuilder.query(boolQuery);
+            mainBuilder.trackTotalHits(true);
+
             SearchRequest searchRequest = new SearchRequest("yhn_index");
             searchRequest.source(mainBuilder);
 
             SearchHit[] hits = client.search(searchRequest, RequestOptions.DEFAULT).getHits().getHits();
+            log.debug("asdf:{}",hits);
             YhnMain.addAll(yhnList(hits));
         }
 
         return YhnMain;
     }
-
 
 
     private List<MoisDto> moisList(SearchHit[] hits) {

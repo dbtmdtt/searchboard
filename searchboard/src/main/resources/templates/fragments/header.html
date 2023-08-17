@@ -6,93 +6,22 @@
         <p>user님 반갑습니다.</p>
     </div>
     <div style="margin-bottom: 20px; margin-top: 10px">
-        <form style="display: flex; align-items: center; justify-content: center;">
-            <input type="text" style="width:300px"/>
-            <button id="searchBtn" type="button" style="margin-left:10px">
-                <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
-            </button>
+        <form style="display: flex; align-items: center; justify-content: center; flex-direction: column"  method="get">
+            <div>
+                <input type="text" style="width:300px" name="keyword"/>
+                <button id="searchBtn" type="submit" style="margin-left:10px">
+                    <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
+                </button>
+            </div>
+            <div style="display: flex; margin-top:20px">
+                <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked id="selectAll">전체검색 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="title" style="margin-right: 5px;">제목 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="content" style="margin-right: 5px;">내용 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="fileName" style="margin-right: 5px;">첨부파일명 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="fileContent" style="margin-right: 5px;">첨부파일내용 &nbsp&nbsp
+            </div>
+
         </form>
-    </div>
-    <div style="margin : 0 auto;">
-        <ul class="nav-list">
-            <li class="nav-item">
-                <a class="nav-link" href="#">통합검색</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="changeContent('보도자료')">보도자료</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" onclick="changeContent('사진자료')">사진자료</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">정치</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">북한</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">경제</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">산업</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">사회</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">전국</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">세계</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">문화</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">라이프</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">연예</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">스포츠</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">오피니언</a>
-                <span class="separator"></span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">사람들</a>
-            </li>
-        </ul>
     </div>
 </div>
 </html>
-<!--<th:block th:fragment="headerFragment">-->
-<!--   -->
-<!--</th:block>-->
-<!--<div style="margin-top: 10px; margin-left:10px">-->
-<!--    <p>user님 반갑습니다.</p>-->
-<!--</div>-->
-<!--<div style="margin-bottom: 20px; margin-top: 10px">-->
-<!--    <form style="display: flex; align-items: center; justify-content: center;">-->
-<!--        <input type="text" style="width:300px"/>-->
-<!--        <button id="searchBtn" type="button" style="margin-left:10px">-->
-<!--            <img src="searchboard/searchboard/src/main/resources/static/search.png"/>-->
-<!--        </button>-->
-<!--    </form>-->
-<!--</div>-->
