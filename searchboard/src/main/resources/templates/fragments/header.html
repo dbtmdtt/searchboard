@@ -1,14 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<script>
+    // // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
+    // document.getElementById('selectAll').addEventListener('click', function() {
+    //     var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+    //     for (var i = 0; i < checkboxes.length; i++) {
+    //         checkboxes[i].checked = false;
+    //     }
+    // });
+    //
+    // // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
+    // var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+    // for (var i = 0; i < otherCheckboxes.length; i++) {
+    //     otherCheckboxes[i].addEventListener('click', function() {
+    //         document.getElementById('selectAll').checked = false;
+    //     });
+    // }
 
+
+
+
+</script>
+<body>
 <div th:fragment="header">
     <div style="margin-top: 10px; margin-left:10px">
         <p>user님 반갑습니다.</p>
     </div>
     <div style="margin-bottom: 20px; margin-top: 10px">
-        <form style="display: flex; align-items: center; justify-content: center; flex-direction: column"  method="get">
+        <form style="display: flex; align-items: center; justify-content: center; flex-direction: column" id="header" >
             <div>
-                <input type="text" style="width:300px" name="keyword"/>
+                <input type="text" style="width:300px" name="keyword" id="keyword"/>
                 <button id="searchBtn" type="submit" style="margin-left:10px">
                     <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
                 </button>
@@ -24,4 +45,6 @@
         </form>
     </div>
 </div>
+</body>
+
 </html>

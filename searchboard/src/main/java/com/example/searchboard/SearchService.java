@@ -46,6 +46,7 @@ public class SearchService {
 
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
                 .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                .size(5)
                 .trackTotalHits(true); // 개수 표시 위함
 
         if(keyword != null && !keyword.isEmpty()) {
@@ -71,7 +72,6 @@ public class SearchService {
             SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
             moisMainList.addAll(moisList(moisResponse.getHits().getHits()));
         }
-
         return moisMainList;
     }
     private List<YhnDto> getYhnMainList(SearchRequest searchRequest_yhn, SearchSourceBuilder mainBuilder, String[] yhnCategories) throws IOException {
@@ -85,31 +85,14 @@ public class SearchService {
 
         return yhnMainList;
     }
-    public List<MoisDto> moisList(String keyword, List<String> searchFields, String domain ) throws IOException {
-//        List<MoisDto> moisMain = new ArrayList<>();
-//        SearchRequest searchRequest_mois = new SearchRequest("mois_index");
-//        if(keyword != null && !keyword.isEmpty()) {
-//            //키워드가 있을경우 키워드로 검색
-//
-//
-//        }else {
-//            SearchSourceBuilder commonSearchSourceBuilder = new SearchSourceBuilder();
-//            commonSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
-//
-//            SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
-//                    .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
-//                    .trackTotalHits(true); // 개수 표시 위함
-//            mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
-//            SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
-//            moisMain.addAll(moisList(moisResponse.getHits().getHits()));
-//
-//        }
-//        return moisMain;
+    public MoisPagination moisList(String keyword, List<String> searchFields, String domain, int page ) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
-
+        Pagination pagination = new Pagination(10000, page);
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
                 .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                .from(pagination.getStartIndex())
+                .size(10)
                 .trackTotalHits(true); // 개수 표시 위함
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -132,11 +115,13 @@ public class SearchService {
         mainBuilder.query(boolQuery);
 
         SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
-        moisMain.addAll(moisList(moisResponse.getHits().getHits()));
+        long totalHits = moisResponse.getHits().getTotalHits().value;
 
-        return moisMain;
+        moisMain.addAll(moisList(moisResponse.getHits().getHits()));
+        MoisPagination moisPagination = new MoisPagination(moisMain, pagination);
+        return moisPagination;
     }
-    public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields) throws IOException {
+    public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields ) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
 
         for (String domain : moisDomain) {
@@ -171,7 +156,6 @@ public class SearchService {
     }
     public List<YhnDto> searchKeywordYhn(String keyword, String[] categories, List<String> searchFields) throws IOException {
         List<YhnDto> YhnMain = new ArrayList<>();
-        log.debug("searchfields:{}", keyword);
 
         for (String category : categories) {
             SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
@@ -199,7 +183,6 @@ public class SearchService {
             searchRequest.source(mainBuilder);
 
             SearchHit[] hits = client.search(searchRequest, RequestOptions.DEFAULT).getHits().getHits();
-            log.debug("asdf:{}",hits);
             YhnMain.addAll(yhnList(hits));
         }
 
