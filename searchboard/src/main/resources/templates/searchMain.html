@@ -1,87 +1,273 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link   rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-            crossorigin="anonymous" />
-    <link rel="icon" href="data:,">
-    <title>Title</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link   rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous" />
+  <link rel="icon" href="data:,">
+  <title>Title</title>
+  <style>
+    .nav-list {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      background-color: #81d4fa;
+      padding: 10px 0;
+      margin: 0;
+      border-top: 2px solid white;
+      border-bottom: 2px solid white;
+      font-size: large;
+      font-weight: bold;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+      padding: 5px;
+      font-weight: bold;
+    }
+
+    .separator {
+      width: 1px;
+      height: 20px;
+      background-color: white;
+      margin: 0 10px;
+    }
+
+    .nav-link.clicked {
+      text-decoration: underline; /* 밑줄 설정 */
+    }
+    .moreBtn{
+      border: 0;
+      background-color: transparent;
+      font-weight: bold;
+    }
+  </style>
 
 
 </head>
 <body>
-<div th:replace="fragments/header :: header"></div>
-<div th:replace="fragments/navbar :: navbar"></div>
-<div th:replace="fragments/content-container :: content-container"></div>
+  <div style="margin-top: 10px; margin-left:10px">
+    <p> user님 반갑습니다.</p>
+  </div>
+  <div style="margin-bottom: 20px; margin-top: 10px">
+    <form id="searchForm" style="display: flex; align-items: center; justify-content: center; flex-direction: column" method="get">
+      <div>
+        <input type="text" style="width:300px" name="keyword" id="keyword"/>
+        <button id="searchBtn" type="submit" style="margin-left:10px">
+          <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
+        </button>
+        <input type="checkbox" name="reSearch" value="true" style="margin-right: 5px;" id="reSearch">결과 내 재검색
+      </div>
+      <div style="display: flex; margin-top:20px">
+        <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked id="selectAll">전체검색
+        &nbsp&nbsp
+        <input type="checkbox" name="searchCategory" value="title" style="margin-right: 5px;">제목 &nbsp&nbsp
+        <input type="checkbox" name="searchCategory" value="content" style="margin-right: 5px;">내용 &nbsp&nbsp
+        <input type="checkbox" name="searchCategory" value="fileName" style="margin-right: 5px;">첨부파일명 &nbsp&nbsp
+        <input type="checkbox" name="searchCategory" value="fileContent" style="margin-right: 5px;">첨부파일내용
+        &nbsp&nbsp
+      </div>
+    </form>
+  </div>
+  <div style="margin : 0 auto;">
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a class="nav-link" href="/" style="text-decoration: underline; text-decoration-thickness: 3px;">통합검색</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/moisAttach">보도자료</a>
+      <span class="separator"></span>
+    </li>
 
+    <li class="nav-item">
+      <a class="nav-link" href="/moisPhoto">사진자료</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnPolitics" >정치</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnNorth" >북한</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnEconomy">경제</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnIndustry" >산업</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnSocial" >사회</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnKorea">전국</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnWorld" >세계</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnCulture">문화</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnLife">라이프</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnEnter">연예</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnSports">스포츠</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnOpinion">오피니언</a>
+      <span class="separator"></span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/yhnPeople">사람들</a>
+    </li>
+  </ul>
+</div>
+  <div style="margin: 30px auto; width:60%;">
+    <ul th:each="domain : ${domains}">
+      <h4>
+        <span th:if="${domain == 'mois_attach'}">보도자료</span>
+        <span th:if="${domain == 'mois_photo'}">사진자료</span>
+        <!--                        (<span th:text="${moisCount['mois_photo']}"></span>건)</span>-->
 
+        <!--                        (<span th:text="${moisCount['mois_attach']}"></span>건)</span>-->
+      </h4>
+      <ul style="list-style-type: none;">
+        <li th:each="mois : ${moisMain}" th:if="${mois.domain} == ${domain}">
+          <a th:href="${mois.url}">
+            <h5 th:utext="${mois.title}" style="margin-top:20px"></h5>
+          </a>
+          <p th:utext="${mois.content}"
+             style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+          <div style="display:flex">
+            <small th:utext="${mois.writer}"></small>
+            <small th:utext="${mois.writeDate}" style="margin-left: 10px"></small>
+          </div>
+
+        </li>
+      </ul>
+      <div style="text-align: right; margin-top:20px; margin-bottom: 20px;">
+        <button class="moreBtn">더보기 ></button>
+      </div>
+    </ul>
+    <ul th:each="category : ${categories}">
+      <h4>
+        <span th:if="${category == '전체기사'}">북한</span>
+        <!--                        (<span th:text="${yhnCount['전체기사']}"></span>건)</span>-->
+        <span th:unless="${category == '전체기사'}" th:text="${category}"></span>
+        <!--                        (<span th:text="${yhnCount[category]}"></span>건)</span>-->
+      </h4>
+      <ul style="list-style-type: none;">
+        <li th:each="yhn : ${yhnMain}" th:if="${yhn.category_one_depth == category}">
+          <div style="display: flex; align-items: center; margin-top: 20px;">
+            <img th:src="${yhn.thumbnailImg}"
+                 style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
+            <div style="width: 85%">
+              <a th:href="${yhn.url}">
+                <h5 th:utext="${yhn.title}"></h5>
+              </a>
+              <p th:utext="${yhn.content}"
+                 style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+              <div style="display:flex">
+                <small th:utext="${yhn.writer}"></small>
+                <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div style="text-align: right; margin-top:20px; margin-bottom: 20px;">
+        <button class="moreBtn">더보기 ></button>
+      </div>
+    </ul>
+  </div>
+  </div>
 
 </body>
 <script>
-    const contentContainer = document.getElementById("content-container");
+  document.addEventListener("DOMContentLoaded", function() {
     const navLinks = document.querySelectorAll(".nav-link");
 
     navLinks.forEach(link => {
-        link.addEventListener("click", async (event) => {
-            event.preventDefault();
-            const contentId = link.getAttribute("data-content");
-            const response = await fetch(`/${contentId}`)
-            const contentHtml = await response.text();
-            contentContainer.innerHTML = contentHtml;
-        });
-    });
+      link.addEventListener("click", function(event) {
+        event.preventDefault(); // 기본 동작(링크 이동)을 막음
 
-    const headerForm = document.getElementById("header");
-
-    headerForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-
-        const response = await fetch("/submit-header-form", {
-            method: "GET",
-            body: formData
+        const queryParams = new URLSearchParams({
+          keyword: document.getElementById("keyword").value,
+          reSearch: document.getElementById("reSearch").checked,
+          searchCategory: getSelectedCategories().join(",")
         });
 
-        // 이후 원하는 처리를 수행할 수 있음
+        const url = this.getAttribute("href") + "?" + queryParams.toString();
+        window.location.href = url;
+      });
     });
+  });
 
-    // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
-    document.getElementById('selectAll').addEventListener('click', function() {
-        var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = false;
-        }
-    });
+  // 선택된 카테고리 가져오는 함수
+  function getSelectedCategories() {
+    const searchCategories = document.getElementsByName("searchCategory");
+    const selectedCategories = Array.from(searchCategories)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
 
-    // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
-    var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-    for (var i = 0; i < otherCheckboxes.length; i++) {
-        otherCheckboxes[i].addEventListener('click', function() {
-            document.getElementById('selectAll').checked = false;
-        });
+    return selectedCategories;
+  }
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const keyword = queryParams.get("keyword");
+  const reSearch = queryParams.has("reSearch");
+  const searchCategories = queryParams.getAll("searchCategory");
+
+  document.getElementById("keyword").value = keyword;
+  document.getElementById("reSearch").checked = reSearch;
+  searchCategories.forEach(category => {
+    const checkbox = document.querySelector(`input[name="searchCategory"][value="${category}"]`);
+    if (checkbox) {
+      checkbox.checked = true;
     }
-    const form = document.getElementById("header");
-    // 서버로 전송할 데이터를 객체로 만듦
-    const searchData = {
-        keyword: keyword,
-        searchCategories: searchCategoryValues
-    };
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault(); // 폼 제출 기본 동작 막기
+  });
+  // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
+  document.getElementById('selectAll').addEventListener('click', function () {
+    var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = false;
+    }
+  });
 
-        const keyword = document.getElementById("keyword").value;
-        const searchCategoryElements = document.querySelectorAll("input[name='searchCategory']:checked");
-        const searchCategoryValues = Array.from(searchCategoryElements).map(element => element.value);
-
-        // 이제 keyword와 searchCategoryValues를 사용하여 서버로 전달하거나 원하는 작업을 수행
-        // fetch 등을 이용하여 서버로 데이터를 전송하는 코드를 작성하세요
+  // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
+  var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+  for (var i = 0; i < otherCheckboxes.length; i++) {
+    otherCheckboxes[i].addEventListener('click', function () {
+      document.getElementById('selectAll').checked = false;
     });
+  }
 
-
-
+</script>
 
 </script>
 </html>

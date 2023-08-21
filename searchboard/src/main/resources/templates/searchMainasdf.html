@@ -1,0 +1,87 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8" />-->
+<!--    <meta name="viewport" content="width=device-width,initial-scale=1" />-->
+<!--    <link   rel="stylesheet"-->
+<!--            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"-->
+<!--            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"-->
+<!--            crossorigin="anonymous" />-->
+<!--    <link rel="icon" href="data:,">-->
+<!--    <title>Title</title>-->
+
+
+<!--</head>-->
+<!--<body>-->
+<!--<div th:replace="fragments/header :: header"></div>-->
+<!--<div th:replace="fragments/navbar :: navbar"></div>-->
+<!--<div th:replace="fragments/content-container :: content-container"></div>-->
+
+
+
+<!--</body>-->
+<!--<script>-->
+<!--    const contentContainer = document.getElementById("content-container");-->
+<!--    const navLinks = document.querySelectorAll(".nav-link");-->
+
+<!--    navLinks.forEach(link => {-->
+<!--        link.addEventListener("click", async (event) => {-->
+<!--            event.preventDefault();-->
+<!--            const contentId = link.getAttribute("data-content");-->
+<!--            const response = await fetch(`/${contentId}`)-->
+<!--            const contentHtml = await response.text();-->
+<!--            contentContainer.innerHTML = contentHtml;-->
+<!--        });-->
+<!--    });-->
+
+<!--    const headerForm = document.getElementById("header");-->
+
+<!--    headerForm.addEventListener("submit", async (event) => {-->
+<!--        event.preventDefault();-->
+
+
+<!--        const response = await fetch("/submit-header-form", {-->
+<!--            method: "GET",-->
+<!--            body: formData-->
+<!--        });-->
+
+<!--        // 이후 원하는 처리를 수행할 수 있음-->
+<!--    });-->
+
+<!--    // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경-->
+<!--    document.getElementById('selectAll').addEventListener('click', function() {-->
+<!--        var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');-->
+<!--        for (var i = 0; i < checkboxes.length; i++) {-->
+<!--            checkboxes[i].checked = false;-->
+<!--        }-->
+<!--    });-->
+
+<!--    // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경-->
+<!--    var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');-->
+<!--    for (var i = 0; i < otherCheckboxes.length; i++) {-->
+<!--        otherCheckboxes[i].addEventListener('click', function() {-->
+<!--            document.getElementById('selectAll').checked = false;-->
+<!--        });-->
+<!--    }-->
+<!--    const form = document.getElementById("header");-->
+<!--    // 서버로 전송할 데이터를 객체로 만듦-->
+<!--    const searchData = {-->
+<!--        keyword: keyword,-->
+<!--        searchCategories: searchCategoryValues-->
+<!--    };-->
+<!--    form.addEventListener("submit", async (event) => {-->
+<!--        event.preventDefault(); // 폼 제출 기본 동작 막기-->
+
+<!--        const keyword = document.getElementById("keyword").value;-->
+<!--        const searchCategoryElements = document.querySelectorAll("input[name='searchCategory']:checked");-->
+<!--        const searchCategoryValues = Array.from(searchCategoryElements).map(element => element.value);-->
+
+<!--        // 이제 keyword와 searchCategoryValues를 사용하여 서버로 전달하거나 원하는 작업을 수행-->
+<!--        // fetch 등을 이용하여 서버로 데이터를 전송하는 코드를 작성하세요-->
+<!--    });-->
+
+
+
+
+<!--</script>-->
+<!--</html>-->

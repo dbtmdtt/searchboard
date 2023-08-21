@@ -4,15 +4,15 @@ import lombok.Data;
 
 import java.util.List;
 @Data
-public class MoisPagination {
-    private List<MoisDto> moisMainList;
+public class YhnPagination {
+    private List<YhnDto> yhnMainList;
     private Pagination pagination;
     private String keyword;
-    public MoisPagination(){
+    public YhnPagination(){
 
     }
-    public  MoisPagination(List<MoisDto> moisMainList,Pagination pagination, String keyword){
-        this.moisMainList = moisMainList;
+    public YhnPagination(List<YhnDto> yhnMainList, Pagination pagination,String keyword){
+        this.yhnMainList = yhnMainList;
         this.pagination = pagination;
         this.keyword = keyword;
     }

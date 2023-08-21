@@ -13,12 +13,10 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.elasticsearch.common.text.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,7 +41,6 @@ public class SearchService {
         SearchMainDto resultDto = new SearchMainDto();
         SearchSourceBuilder commonSearchSourceBuilder = new SearchSourceBuilder();
         commonSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
-
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
                 .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
                 .size(5)
@@ -51,8 +48,8 @@ public class SearchService {
 
         if(keyword != null && !keyword.isEmpty()) {
             //키워드가 있을경우 키워드로 검색
-            resultDto.setMoisMainList(searchKeywordMois(keyword, moisDomain, searchCategory));
-            resultDto.setYhnMainList(searchKeywordYhn(keyword, yhnCategories, searchCategory));
+            resultDto.setMoisMainList(searchKeywordMois(keyword, moisDomain, searchCategory,searchRequest_mois, mainBuilder));
+            resultDto.setYhnMainList(searchKeywordYhn(keyword, yhnCategories, searchCategory,searchRequest_yhn, mainBuilder));
 
         }else{
 
@@ -64,6 +61,9 @@ public class SearchService {
         }
         return resultDto;
     }
+
+    // 나머지 코드와 mainList 메서드 구현
+    ////통합검색 메인 출력
     private List<MoisDto> getMoisMainList(SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder, String[] moisDomain) throws IOException {
         List<MoisDto> moisMainList = new ArrayList<>();
 
@@ -85,19 +85,41 @@ public class SearchService {
 
         return yhnMainList;
     }
-    public MoisPagination moisList(String keyword, List<String> searchFields, String domain, int page ) throws IOException {
+    // 각각 카테고리 리스트
+    public MoisPagination moisPageList(String keyword, List<String> searchFields, String domain, int page , String sort) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
+        SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
         Pagination pagination = new Pagination(10000, page);
-        SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
-                .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
-                .from(pagination.getStartIndex())
-                .size(10)
-                .trackTotalHits(true); // 개수 표시 위함
+        if(sort.equals("dateDesc")){
+
+            mainBuilder.sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                    .from(pagination.getStartIndex())
+                    .size(10)
+                    .trackTotalHits(true); // 개수 표시 위함
+        }else if(sort.equals("dateAsc")){
+
+            mainBuilder.sort(SortBuilders.fieldSort("write_date").order(SortOrder.ASC))
+                    .from(pagination.getStartIndex())
+                    .size(10)
+                    .trackTotalHits(true); // 개수 표시 위함;
+        }else if(sort.equals("accuracyDesc")){
+            mainBuilder.sort(SortBuilders.scoreSort().order(SortOrder.DESC))
+                    .from(pagination.getStartIndex())
+                    .size(10)
+                    .trackTotalHits(true);
+        }else{
+            mainBuilder.sort(SortBuilders.scoreSort().order(SortOrder.ASC))
+                    .from(pagination.getStartIndex())
+                    .size(10)
+                    .trackTotalHits(true);
+        }
+
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         if (keyword != null && !keyword.isEmpty()) {
+
             // 키워드가 있을 경우 키워드로 검색
             if (searchFields.contains("all")) {
                 MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, "title", "content", "_file.content", "_file.nameOrg");
@@ -117,15 +139,52 @@ public class SearchService {
         SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
         long totalHits = moisResponse.getHits().getTotalHits().value;
 
-        moisMain.addAll(moisList(moisResponse.getHits().getHits()));
-        MoisPagination moisPagination = new MoisPagination(moisMain, pagination);
+        moisMain.addAll(moisSearchList(moisResponse.getHits().getHits(),keyword));
+        MoisPagination moisPagination = new MoisPagination(moisMain, pagination, keyword);
         return moisPagination;
     }
-    public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields ) throws IOException {
+    public YhnPagination yhnPageList(String keyword, List<String> searchFields, String category, int page ) throws IOException {
+        List<YhnDto> yhnMain = new ArrayList<>();
+        SearchRequest searchRequest_mois = new SearchRequest("yhn_index");
+        Pagination pagination = new Pagination(10000, page);
+        SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
+                .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                .from(pagination.getStartIndex())
+                .size(10)
+                .trackTotalHits(true); // 개수 표시 위함
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            // 키워드가 있을 경우 키워드로 검색
+            if (searchFields.contains("all")) {
+                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, "title", "content", "_file.content", "_file.nameOrg");
+                boolQuery.must(multiMatchQuery);
+            } else {
+                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, searchFields.toArray(new String[searchFields.size()]));
+                boolQuery.must(multiMatchQuery);
+
+            }
+        }
+
+        TermQueryBuilder termQuery = QueryBuilders.termQuery("category_one_depth", category);
+        boolQuery.filter(termQuery);
+
+
+        mainBuilder.query(boolQuery);
+
+        SearchResponse yhnResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
+        long totalHits = yhnResponse.getHits().getTotalHits().value;
+
+        yhnMain.addAll(yhnSearchList(yhnResponse.getHits().getHits(),keyword));
+        YhnPagination yhnPagination = new YhnPagination(yhnMain, pagination, keyword);
+        return yhnPagination;
+    }
+    //검색 결과 메인
+    public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields,SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder  ) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
 
         for (String domain : moisDomain) {
-            SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
             if (searchFields.contains("all")) {
@@ -144,21 +203,20 @@ public class SearchService {
 
             mainBuilder.query(boolQuery);
 
-            SearchRequest searchRequest = new SearchRequest("mois_index");
-            searchRequest.source(mainBuilder);
 
-            SearchHit[] hits = client.search(searchRequest, RequestOptions.DEFAULT).getHits().getHits();
+            searchRequest_mois.source(mainBuilder);
 
-            moisMain.addAll(moisList(hits));
+            SearchHit[] hits = client.search(searchRequest_mois, RequestOptions.DEFAULT).getHits().getHits();
+
+            moisMain.addAll(moisSearchList(hits,keyword));
         }
 
         return moisMain;
     }
-    public List<YhnDto> searchKeywordYhn(String keyword, String[] categories, List<String> searchFields) throws IOException {
+    public List<YhnDto> searchKeywordYhn(String keyword, String[] categories, List<String> searchFields, SearchRequest searchRequest_yhn, SearchSourceBuilder mainBuilder) throws IOException {
         List<YhnDto> YhnMain = new ArrayList<>();
 
         for (String category : categories) {
-            SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
             // Create a multi-match query for the given keyword and all searchFields
@@ -179,16 +237,15 @@ public class SearchService {
             mainBuilder.query(boolQuery);
             mainBuilder.trackTotalHits(true);
 
-            SearchRequest searchRequest = new SearchRequest("yhn_index");
-            searchRequest.source(mainBuilder);
 
-            SearchHit[] hits = client.search(searchRequest, RequestOptions.DEFAULT).getHits().getHits();
-            YhnMain.addAll(yhnList(hits));
+            searchRequest_yhn.source(mainBuilder);
+
+            SearchHit[] hits = client.search(searchRequest_yhn, RequestOptions.DEFAULT).getHits().getHits();
+            YhnMain.addAll(yhnSearchList(hits,keyword));
         }
 
         return YhnMain;
     }
-
 
     private List<MoisDto> moisList(SearchHit[] hits) {
         List<MoisDto> results = new ArrayList<>();
@@ -206,6 +263,65 @@ public class SearchService {
             result.setFile_content((String) attachMap.get("_file.content"));
             result.setFile_name((String) attachMap.get("_file.nameOrg"));
 
+            // <b> 태그를 포함한 필드 설정
+//            String contentWithBold = addBoldTags((String) attachMap.get("content"), keyword);
+//            result.setContent(contentWithBold);
+
+            results.add(result);
+        }
+
+        return results;
+    }
+    private List<MoisDto> moisSearchList(SearchHit[] hits, String keyword) {
+        List<MoisDto> results = new ArrayList<>();
+
+        for (SearchHit hit : hits) {
+            Map<String, Object> attachMap = hit.getSourceAsMap();
+            MoisDto result = new MoisDto();
+//            result.setTitle((String) attachMap.get("title"));
+            result.setThumbnailImg((String) attachMap.get("thumbnail_img"));
+//            result.setContent((String) attachMap.get("content"));
+            result.setWriter((String) attachMap.get("writer"));
+            result.setWriteDate((String) attachMap.get("write_date"));
+            result.setDomain((String) attachMap.get("domain"));
+            result.setUrl((String) attachMap.get("url"));
+            result.setFile_content((String) attachMap.get("_file.content"));
+            result.setFile_name((String) attachMap.get("_file.nameOrg"));
+
+            // <b> 태그를 포함한 필드 설정
+            String contentWithBold = addBoldTags((String) attachMap.get("content"), keyword);
+            result.setContent(contentWithBold);
+
+            String titleWithBold = addBoldTags((String) attachMap.get("title"), keyword);
+            result.setTitle(titleWithBold);
+
+            results.add(result);
+        }
+
+        return results;
+    }
+    private List<YhnDto> yhnSearchList(SearchHit[] hits,String keyword) {
+        List<YhnDto> results = new ArrayList<>();
+
+        for (SearchHit hit : hits) {
+            Map<String, Object> attachMap = hit.getSourceAsMap();
+            YhnDto result = new YhnDto();
+//            result.setTitle((String) attachMap.get("title"));
+            result.setThumbnailImg((String) attachMap.get("thumbnail_img"));
+//            result.setContent((String) attachMap.get("content"));
+            result.setWriter((String) attachMap.get("writer"));
+            result.setWriteDate((String) attachMap.get("write_date"));
+            result.setDomain((String) attachMap.get("domain"));
+            result.setCategory_one_depth((String) attachMap.get("category_one_depth"));
+            result.setUrl((String) attachMap.get("url"));
+            result.setThumbnailImg((String)attachMap.get("thumbnail_url"));
+
+            // <b> 태그를 포함한 필드 설정
+            String contentWithBold = addBoldTags((String) attachMap.get("content"), keyword);
+            result.setContent(contentWithBold);
+
+            String titleWithBold = addBoldTags((String) attachMap.get("title"), keyword);
+            result.setTitle(titleWithBold);
             results.add(result);
         }
 
@@ -231,6 +347,25 @@ public class SearchService {
 
         return results;
     }
+    private String addBoldTags(String text, String keyword) {
+        if (text == null || keyword == null || keyword.isEmpty()) {
+            return text;
+        }
+
+        // 키워드를 <b> 태그로 감싸기
+        String lowerCaseText = text.toLowerCase();
+        String lowerCaseKeyword = keyword.toLowerCase();
+        int index = lowerCaseText.indexOf(lowerCaseKeyword);
+        if (index != -1) {
+            String beforeKeyword = text.substring(0, index);
+            String afterKeyword = text.substring(index + keyword.length());
+            return beforeKeyword + "<b style='color:red'>" + text.substring(index, index + keyword.length()) + "</b>" + afterKeyword;
+        }
+
+        return text;
+    }
+
+
 
 
 }
