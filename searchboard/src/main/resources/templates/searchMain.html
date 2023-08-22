@@ -65,7 +65,7 @@
     <form id="searchForm" style="display: flex; align-items: center; justify-content: center; flex-direction: column" method="get">
       <div>
         <input type="text" style="width:300px" name="keyword" id="keyword"/>
-        <button id="searchBtn" type="submit" style="margin-left:10px">
+        <button type="button" id="searchBtn" onclick="search()" style="margin-left:10px">
           <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
         </button>
         <input type="checkbox" name="reSearch" style="margin-right: 5px;" id="reSearch">결과 내 재검색
@@ -219,248 +219,15 @@
 
 
 <script>
-  // document.addEventListener("DOMContentLoaded", function() {
-  //   const navLinks = document.querySelectorAll(".nav-link");
-  //
-  //   navLinks.forEach(link => {
-  //     link.addEventListener("click", function(event) {
-  //       event.preventDefault(); // 기본 동작(링크 이동)을 막음
-  //
-  //       const queryParams = new URLSearchParams({
-  //         keyword: document.getElementById("keyword").value,
-  //         reSearch: document.getElementById("reSearch").checked,
-  //         searchCategory: getSelectedCategories().join(",")
-  //       });
-  //
-  //       const url = this.getAttribute("href") + "?" + queryParams.toString();
-  //       window.location.href = url;
-  //     });
-  //   });
-  // });
-  //
-  // // 선택된 카테고리 가져오는 함수
-  // function getSelectedCategories() {
-  //   const searchCategories = document.getElementsByName("searchCategory");
-  //   const selectedCategories = Array.from(searchCategories)
-  //           .filter(checkbox => checkbox.checked)
-  //           .map(checkbox => checkbox.value);
-  //
-  //   return selectedCategories;
-  // }
-  //
-  // const queryParams = new URLSearchParams(window.location.search);
-  // const keyword = queryParams.get("keyword");
-  // const reSearch = queryParams.has("reSearch");
-  // const searchCategories = queryParams.getAll("searchCategory");
-  //
-  // document.getElementById("keyword").value = keyword;
-  // document.getElementById("reSearch").checked = reSearch;
-  // searchCategories.forEach(category => {
-  //   const checkbox = document.querySelector(`input[name="searchCategory"][value="${category}"]`);
-  //   if (checkbox) {
-  //     checkbox.checked = true;
-  //   }
-  // });
-  // // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
-  // document.getElementById('selectAll').addEventListener('click', function () {
-  //   var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-  //   for (var i = 0; i < checkboxes.length; i++) {
-  //     checkboxes[i].checked = false;
-  //   }
-  // });
-  //
-  // // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
-  // var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-  // for (var i = 0; i < otherCheckboxes.length; i++) {
-  //   otherCheckboxes[i].addEventListener('click', function () {
-  //     document.getElementById('selectAll').checked = false;
-  //   });
-  // }
-  // //자동완성
-  // $(document).ready(function() {
-  //
-  //   const autocompleteResults = $('#autocompleteResults');
-  //   const keywordInput = $('#keyword');
-  //
-  //   keywordInput.on('input', function() {
-  //     const keyword = $(this).val();
-  //     if (keyword.trim() === '') {
-  //       autocompleteResults.hide();
-  //       return;
-  //     }
-  //
-  //     $.ajax({
-  //       url: '/search',
-  //       method: 'GET',
-  //       data: { keyword: keyword },
-  //       success: function(data) {
-  //         autocompleteResults.empty();
-  //         if (data) {
-  //           const resultsList = $('<ul></ul>');
-  //
-  //           data.forEach(function(keyword) {
-  //             const listItem = $('<li style="list-style-type: none;  cursor: pointer;">' + keyword + '</li>');
-  //             listItem.appendTo(resultsList);
-  //           });
-  //
-  //           // Clear previous results and append new ones
-  //           autocompleteResults.empty().append(resultsList);
-  //           autocompleteResults.show();
-  //         }
-  //       },
-  //       error: function(error) {
-  //         console.error('Error:', error);
-  //       }
-  //     });
-  //   });
-  //
-  //
-  //   autocompleteResults.on('click', 'li', function() {
-  //     const clickedKeyword = $(this).text();
-  //     keywordInput.val(clickedKeyword);
-  //     autocompleteResults.hide();
-  //   });
-  //
-  //   $(document).on('click', function(event) {
-  //     if (!autocompleteResults.is(event.target) && !keywordInput.is(event.target) && autocompleteResults.has(event.target).length === 0) {
-  //       autocompleteResults.hide();
-  //     }
-  //   });
-  // });
-  // //금칙어
-  // $(document).ready(function() {
-  //   const searchForm = $('#searchForm');
-  //   const keywordInput = $('#keyword');
-  //
-  //   searchForm.submit(function(event) {
-  //     event.preventDefault();
-  //
-  //     const keyword = keywordInput.val();
-  //     if (keyword.trim() === '') {
-  //       return;
-  //     }
-  //
-  //     $.ajax({
-  //       url: '/forbiddenWord',
-  //       type: 'GET',
-  //       success: function(forbiddenWords) {
-  //         console.log(forbiddenWords);
-  //         if (forbiddenWords.includes(keyword)) {
-  //           // Show alert for forbidden word
-  //           console.log('금칙어');
-  //           alert('금칙어가 포함되어 있습니다.');
-  //         } else {
-  //           // Proceed with search or other actions
-  //           searchForm.unbind('submit').submit();
-  //         }
-  //       },
-  //       error: function(error) {
-  //         // console.error('Error:', error);
-  //       }
-  //     });
-  //   });
-  // });
-  //
-  //
-  // $(document).ready(function() {
-  //   $("#searchForm").submit(function(e) {
-  //     e.preventDefault();
-  //
-  //     // 사용자 입력값 가져오기
-  //     var searchKeyword = $("#keyword").val();
-  //     var searchCategory = $("input[name='searchCategory']:checked").map(function(){
-  //       return this.value;
-  //     }).get();
-  //
-  //     // AJAX 요청
-  //     $.ajax({
-  //       type: "GET",
-  //       url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
-  //       data: {
-  //         search: searchKeyword
-  //       },
-  //       success: function(response) {
-  //         if (response) {
-  //           // 검색어 확인 메시지 표시
-  //           var searchResultsDiv = $("#searchResults");
-  //           searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
-  //           searchResultsDiv.css("display", "block");
-  //           searchResultsDiv.show;
-  //
-  //           // 새 이벤트 추가
-  //           $("#confirmButton").off("click").on("click", function(e) {
-  //             e.preventDefault();
-  //             // 검색어 변경 후 다시 검색 폼 제출
-  //             $("#keyword").val(response);
-  //
-  //             // 검색어 변경 후 서버로 검색 요청
-  //             $("#searchForm").submit();
-  //           });
-  //         } else {
-  //           $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
-  //         }
-  //       },
-  //       error: function() {
-  //         $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
-  //       }
-  //     });
-  //   });
-  // });
-  //
-  // $(document).ready(function() {
-  //   $("#searchForm").submit(function(e) {
-  //     e.preventDefault();
-  //
-  //     // 사용자 입력값 가져오기
-  //     var searchKeyword = $("#keyword").val();
-  //     var searchCategory = $("input[name='searchCategory']:checked").map(function () {
-  //       return this.value;
-  //     }).get();
-  //
-  //     // AJAX 요청
-  //     $.ajax({
-  //       type: "GET",
-  //       url: "/recommend",
-  //       data: {
-  //         keyword: searchKeyword
-  //       },
-  //       success: function (response) {
-  //         if (response && response.length > 0) {
-  //           var recommendDiv = $("#recommend");
-  //           recommendDiv.empty(); // 기존 내용 비우기
-  //
-  //           // 추천 단어 리스트 출력
-  //           var ul = $("<ul>");
-  //           $.each(response, function(index, word) {
-  //             var li = $("<li>").text(word);
-  //             ul.append(li);
-  //           });
-  //           recommendDiv.append(ul);
-  //         } else {
-  //           $("#recommend").html("<p>추천 단어가 없습니다.</p>");
-  //         }
-  //       },
-  //       error: function () {
-  //         $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
-  //       }
-  //     });
-  //   });
-  // });
-  ////////////////////////////////////
-
-
-  window.onload = function() {
-    const searchForm = $('#searchForm');
-    const keywordInput = $('#keyword');
-    const autocompleteResults = $('#autocompleteResults');
-
+  document.addEventListener("DOMContentLoaded", function() {
     const navLinks = document.querySelectorAll(".nav-link");
+
     navLinks.forEach(link => {
       link.addEventListener("click", function(event) {
-        event.preventDefault();
+        event.preventDefault(); // 기본 동작(링크 이동)을 막음
 
         const queryParams = new URLSearchParams({
-          keyword: keywordInput.val(),
+          keyword: document.getElementById("keyword").value,
           reSearch: document.getElementById("reSearch").checked,
           searchCategory: getSelectedCategories().join(",")
         });
@@ -469,17 +236,50 @@
         window.location.href = url;
       });
     });
+  });
 
-    function getSelectedCategories() {
-      const searchCategories = document.getElementsByName("searchCategory");
-      const selectedCategories = Array.from(searchCategories)
-              .filter(checkbox => checkbox.checked)
-              .map(checkbox => checkbox.value);
+  // 선택된 카테고리 가져오는 함수
+  function getSelectedCategories() {
+    const searchCategories = document.getElementsByName("searchCategory");
+    const selectedCategories = Array.from(searchCategories)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
 
-      return selectedCategories;
+    return selectedCategories;
+  }
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const keyword = queryParams.get("keyword");
+  const reSearch = queryParams.has("reSearch");
+  const searchCategories = queryParams.getAll("searchCategory");
+
+  document.getElementById("keyword").value = keyword;
+  document.getElementById("reSearch").checked = reSearch;
+  searchCategories.forEach(category => {
+    const checkbox = document.querySelector(`input[name="searchCategory"][value="${category}"]`);
+    if (checkbox) {
+      checkbox.checked = true;
     }
+  });
+  // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
+  document.getElementById('selectAll').addEventListener('click', function () {
+    var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = false;
+    }
+  });
 
-    // 자동완성
+  // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
+  var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+  for (var i = 0; i < otherCheckboxes.length; i++) {
+    otherCheckboxes[i].addEventListener('click', function () {
+      document.getElementById('selectAll').checked = false;
+    });
+  }
+
+
+    const autocompleteResults = $('#autocompleteResults');
+    const keywordInput = $('#keyword');
 
     keywordInput.on('input', function() {
       const keyword = $(this).val();
@@ -513,6 +313,7 @@
       });
     });
 
+
     autocompleteResults.on('click', 'li', function() {
       const clickedKeyword = $(this).text();
       keywordInput.val(clickedKeyword);
@@ -525,122 +326,457 @@
       }
     });
 
-    searchForm.submit(function(event) {
-      event.preventDefault();
 
-      const keyword = keywordInput.val().trim();
-      if (keyword === '') {
-        return;
-      }
+    const searchForm = $('#searchForm');
 
-      $.ajax({
-        url: '/forbiddenWord',
-        type: 'GET',
-        success: function(forbiddenWords) {
-          console.log(forbiddenWords);
-          if (forbiddenWords.includes(keyword)) {
-            console.log('금칙어');
-            alert('금칙어가 포함되어 있습니다.');
-          } else {
-            handleSearch(keyword);
-          }
-        },
-        error: function(error) {
-          console.error('Error:', error);
+    function search() {
+      $("#searchForm").submit();
+      // const keyword = keywordInput.val();
+      // if (keyword.trim() === '') {
+      //   return;
+      // }
+      //
+      // $.ajax({
+      //   url: '/forbiddenWord',
+      //   type: 'GET',
+      //   success: function (forbiddenWords) {
+      //     console.log(forbiddenWords);
+      //     if (forbiddenWords.includes(keyword)) {
+      //       // Show alert for forbidden word
+      //       console.log('금칙어');
+      //       alert('금칙어가 포함되어 있습니다.');
+      //     } else {
+      //       // Proceed with search or other actions
+      //       // searchForm.unbind('submit').submit();
+      //     }
+      //   },
+      //   error: function (error) {
+      //     // console.error('Error:', error);
+      //   }
+      // });
+      // $.ajax({
+      //   type: "GET",
+      //   url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
+      //   data: {
+      //     search: keyword
+      //   },
+      //   success: function (response) {
+      //     if (response) {
+      //       // 검색어 확인 메시지 표시
+      //       var searchResultsDiv = $("#searchResults");
+      //       searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
+      //       searchResultsDiv.css("display", "block");
+      //       searchResultsDiv.show;
+      //
+      //       // 새 이벤트 추가
+      //       $("#confirmButton").off("click").on("click", function (e) {
+      //         e.preventDefault();
+      //         // 검색어 변경 후 다시 검색 폼 제출
+      //         $("#keyword").val(response);
+      //
+      //         // 검색어 변경 후 서버로 검색 요청
+      //         // $("#searchForm").submit();
+      //       });
+      //     } else {
+      //       $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
+      //     }
+      //   },
+      //   error: function () {
+      //     $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
+      //   }
+      // });
+      //
+      // $.ajax({
+      //   type: "GET",
+      //   url: "/recommend",
+      //   data: {
+      //     keyword: keyword
+      //   },
+      //   success: function (response) {
+      //     if (response && response.length > 0) {
+      //       var recommendDiv = $("#recommend");
+      //       recommendDiv.empty(); // 기존 내용 비우기
+      //
+      //       // 추천 단어 리스트 출력
+      //       var ul = $("<ul>");
+      //       $.each(response, function (index, word) {
+      //         var li = $("<li>").text(word);
+      //         ul.append(li);
+      //       });
+      //       recommendDiv.append(ul);
+      //     } else {
+      //       $("#recommend").html("<p>추천 단어가 없습니다.</p>");
+      //     }
+      //   },
+      //   error: function () {
+      //     $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
+      //   }
+      // });
+    }
+  $(document).ready(function () {
+
+    const keyword = keywordInput.val();
+    if (keyword.trim() === '') {
+      return;
+    }
+
+    $.ajax({
+      url: '/forbiddenWord',
+      type: 'GET',
+      success: function (forbiddenWords) {
+        console.log(forbiddenWords);
+        if (forbiddenWords.includes(keyword)) {
+          // Show alert for forbidden word
+          console.log('금칙어');
+          alert('금칙어가 포함되어 있습니다.');
+        } else {
+          // Proceed with search or other actions
+          // searchForm.unbind('submit').submit();
         }
-      });
+      },
+      error: function (error) {
+        // console.error('Error:', error);
+      }
+    });
+    $.ajax({
+      type: "GET",
+      url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
+      data: {
+        search: keyword
+      },
+      success: function (response) {
+        if (response) {
+          // 검색어 확인 메시지 표시
+          var searchResultsDiv = $("#searchResults");
+          searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
+          searchResultsDiv.css("display", "block");
+          searchResultsDiv.show;
+
+          // 새 이벤트 추가
+          $("#confirmButton").off("click").on("click", function (e) {
+            e.preventDefault();
+            // 검색어 변경 후 다시 검색 폼 제출
+            $("#keyword").val(response);
+
+            // 검색어 변경 후 서버로 검색 요청
+            $("#searchForm").submit();
+          });
+        } else {
+          $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
+        }
+      },
+      error: function () {
+        $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
+      }
     });
 
-    function handleSearch(keyword) {
-      const searchCategory = $("input[name='searchCategory']:checked").map(function() {
-        return this.value;
-      }).get();
+    $.ajax({
+      type: "GET",
+      url: "/recommend",
+      data: {
+        keyword: keyword
+      },
+      success: function (response) {
+        if (response && response.length > 0) {
+          var recommendDiv = $("#recommend");
+          recommendDiv.empty(); // 기존 내용 비우기
 
-      $.ajax({
-        type: 'GET',
-        url: '/getTypoSuggest',
-        data: {
-          search: keyword
-        },
-        success: function(response) {
-          if (response) {
-            const searchResultsDiv = $('#searchResults');
-            searchResultsDiv.html(`<p>오타 교정된 단어: ${response}</p><button id='confirmButton'>이 단어로 검색</button>`);
-            searchResultsDiv.css('display', 'block');
-
-            $('#confirmButton').off('click').on('click', function(e) {
-              keywordInput.val(response);
-              searchForm.submit();
-            });
-          } else {
-            $('#searchResults').html('<p></p>');
-          }
-        },
-        error: function() {
-          $('#searchResults').html('<p>검색 중 오류가 발생했습니다.</p>');
+          // 추천 단어 리스트 출력
+          var ul = $("<ul>");
+          $.each(response, function (index, word) {
+            var li = $("<li>").text(word);
+            ul.append(li);
+          });
+          recommendDiv.append(ul);
+        } else {
+          $("#recommend").html("<p>추천 단어가 없습니다.</p>");
         }
-      });
-
-      $.ajax({
-        type: 'GET',
-        url: '/recommend',
-        data: {
-          keyword: keyword
-        },
-        success: function(response) {
-          if (response && response.length > 0) {
-            const recommendDiv = $('#recommend');
-            recommendDiv.empty();
-
-            const ul = $('<ul>');
-            $.each(response, function(index, word) {
-              const li = $('<li>').text(word);
-              ul.append(li);
-            });
-            recommendDiv.append(ul);
-          } else {
-            $('#recommend').html('<p>추천 단어가 없습니다.</p>');
-          }
-        },
-        error: function() {
-          $('#recommend').html('<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>');
-        }
-      });
-    }
-    // URL 파라미터에서 검색어 추출 및 처리
-    const queryParams = new URLSearchParams(window.location.search);
-    const keywordFromURL = queryParams.get('keyword');
-    if (keywordFromURL) {
-      keywordInput.val(keywordFromURL);
-      handleSearch(keywordFromURL);
-    }
-
-    // 검색 폼 제출 처리
-    searchForm.submit(function(event) {
-      event.preventDefault();
-      const keyword = keywordInput.val().trim();
-      if (keyword === '') {
-        return;
-      }
-      handleSearch(keyword);
-    });
-
-    // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
-    document.getElementById('selectAll').addEventListener('click', function () {
-      var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-      for (var i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = false;
+      },
+      error: function () {
+        $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
       }
     });
+  });
 
-    // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
-    var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
-    for (var i = 0; i < otherCheckboxes.length; i++) {
-      otherCheckboxes[i].addEventListener('click', function () {
-        document.getElementById('selectAll').checked = false;
-      });
-    }
-  };
+
+   // searchForm.submit(function(e) {
+   //    e.preventDefault();
+   //
+   //    // 사용자 입력값 가져오기
+   //    var searchKeyword = $("#keyword").val();
+   //    var searchCategory = $("input[name='searchCategory']:checked").map(function(){
+   //      return this.value;
+   //    }).get();
+   //
+   //    // AJAX 요청
+   //    $.ajax({
+   //      type: "GET",
+   //      url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
+   //      data: {
+   //        search: searchKeyword
+   //      },
+   //      success: function(response) {
+   //        if (response) {
+   //          // 검색어 확인 메시지 표시
+   //          var searchResultsDiv = $("#searchResults");
+   //          searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
+   //          searchResultsDiv.css("display", "block");
+   //          searchResultsDiv.show;
+   //
+   //          // 새 이벤트 추가
+   //          $("#confirmButton").off("click").on("click", function(e) {
+   //            e.preventDefault();
+   //            // 검색어 변경 후 다시 검색 폼 제출
+   //            $("#keyword").val(response);
+   //
+   //            // 검색어 변경 후 서버로 검색 요청
+   //            $("#searchForm").submit();
+   //          });
+   //        } else {
+   //          $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
+   //        }
+   //      },
+   //      error: function() {
+   //        $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
+   //      }
+   //    });
+   //
+   //    $.ajax({
+   //      type: "GET",
+   //      url: "/recommend",
+   //      data: {
+   //        keyword: searchKeyword
+   //      },
+   //      success: function (response) {
+   //        if (response && response.length > 0) {
+   //          var recommendDiv = $("#recommend");
+   //          recommendDiv.empty(); // 기존 내용 비우기
+   //
+   //          // 추천 단어 리스트 출력
+   //          var ul = $("<ul>");
+   //          $.each(response, function(index, word) {
+   //            var li = $("<li>").text(word);
+   //            ul.append(li);
+   //          });
+   //          recommendDiv.append(ul);
+   //        } else {
+   //          $("#recommend").html("<p>추천 단어가 없습니다.</p>");
+   //        }
+   //      },
+   //      error: function () {
+   //        $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
+   //      }
+   //    });
+   //  });
+
+  // });
+  //금칙어
+
+
+
+
+
+
+
+  // window.onload = function() {
+  //   const searchForm = $('#searchForm');
+  //   const keywordInput = $('#keyword');
+  //   const autocompleteResults = $('#autocompleteResults');
+  //
+  //   const navLinks = document.querySelectorAll(".nav-link");
+  //   navLinks.forEach(link => {
+  //     link.addEventListener("click", function(event) {
+  //       event.preventDefault();
+  //
+  //       const queryParams = new URLSearchParams({
+  //         keyword: keywordInput.val(),
+  //         reSearch: document.getElementById("reSearch").checked,
+  //         searchCategory: getSelectedCategories().join(",")
+  //       });
+  //
+  //       const url = this.getAttribute("href") + "?" + queryParams.toString();
+  //       window.location.href = url;
+  //     });
+  //   });
+  //
+  //   function getSelectedCategories() {
+  //     const searchCategories = document.getElementsByName("searchCategory");
+  //     const selectedCategories = Array.from(searchCategories)
+  //             .filter(checkbox => checkbox.checked)
+  //             .map(checkbox => checkbox.value);
+  //
+  //     return selectedCategories;
+  //   }
+  //
+  //   // 자동완성
+  //
+  //   keywordInput.on('input', function() {
+  //     const keyword = $(this).val();
+  //     if (keyword.trim() === '') {
+  //       autocompleteResults.hide();
+  //       return;
+  //     }
+  //
+  //     $.ajax({
+  //       url: '/search',
+  //       method: 'GET',
+  //       data: { keyword: keyword },
+  //       success: function(data) {
+  //         autocompleteResults.empty();
+  //         if (data) {
+  //           const resultsList = $('<ul></ul>');
+  //
+  //           data.forEach(function(keyword) {
+  //             const listItem = $('<li style="list-style-type: none;  cursor: pointer;">' + keyword + '</li>');
+  //             listItem.appendTo(resultsList);
+  //           });
+  //
+  //           // Clear previous results and append new ones
+  //           autocompleteResults.empty().append(resultsList);
+  //           autocompleteResults.show();
+  //         }
+  //       },
+  //       error: function(error) {
+  //         console.error('Error:', error);
+  //       }
+  //     });
+  //   });
+  //
+  //   autocompleteResults.on('click', 'li', function() {
+  //     const clickedKeyword = $(this).text();
+  //     keywordInput.val(clickedKeyword);
+  //     autocompleteResults.hide();
+  //   });
+  //
+  //   $(document).on('click', function(event) {
+  //     if (!autocompleteResults.is(event.target) && !keywordInput.is(event.target) && autocompleteResults.has(event.target).length === 0) {
+  //       autocompleteResults.hide();
+  //     }
+  //   });
+  //
+  //   searchForm.submit(function(event) {
+  //     event.preventDefault();
+  //
+  //     const keyword = keywordInput.val().trim();
+  //     if (keyword === '') {
+  //       return;
+  //     }
+  //
+  //     $.ajax({
+  //       url: '/forbiddenWord',
+  //       type: 'GET',
+  //       success: function(forbiddenWords) {
+  //         console.log(forbiddenWords);
+  //         if (forbiddenWords.includes(keyword)) {
+  //           console.log('금칙어');
+  //           alert('금칙어가 포함되어 있습니다.');
+  //         } else {
+  //           handleSearch(keyword);
+  //         }
+  //       },
+  //       error: function(error) {
+  //         console.error('Error:', error);
+  //       }
+  //     });
+  //   });
+  //
+  //   function handleSearch(keyword) {
+  //     const searchCategory = $("input[name='searchCategory']:checked").map(function() {
+  //       return this.value;
+  //     }).get();
+  //
+  //     $.ajax({
+  //       type: 'GET',
+  //       url: '/getTypoSuggest',
+  //       data: {
+  //         search: keyword
+  //       },
+  //       success: function(response) {
+  //         if (response) {
+  //           const searchResultsDiv = $('#searchResults');
+  //           searchResultsDiv.html(`<p>오타 교정된 단어: ${response}</p><button id='confirmButton'>이 단어로 검색</button>`);
+  //           searchResultsDiv.css('display', 'block');
+  //
+  //           $('#confirmButton').off('click').on('click', function(e) {
+  //             keywordInput.val(response);
+  //             searchForm.submit();
+  //           });
+  //         } else {
+  //           $('#searchResults').html('<p></p>');
+  //         }
+  //       },
+  //       error: function() {
+  //         $('#searchResults').html('<p>검색 중 오류가 발생했습니다.</p>');
+  //       }
+  //     });
+  //
+  //     $.ajax({
+  //       type: 'GET',
+  //       url: '/recommend',
+  //       data: {
+  //         keyword: keyword
+  //       },
+  //       success: function(response) {
+  //         if (response && response.length > 0) {
+  //           const recommendDiv = $('#recommend');
+  //           recommendDiv.empty();
+  //
+  //           const ul = $('<ul>');
+  //           $.each(response, function(index, word) {
+  //             const li = $('<li>').text(word);
+  //             ul.append(li);
+  //           });
+  //           recommendDiv.append(ul);
+  //         } else {
+  //           $('#recommend').html('<p>추천 단어가 없습니다.</p>');
+  //         }
+  //       },
+  //       error: function() {
+  //         $('#recommend').html('<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>');
+  //       }
+  //     });
+  //   }
+  //
+  //
+  //
+  //
+  //
+  //   // URL 파라미터에서 검색어 추출 및 처리
+  //   const queryParams = new URLSearchParams(window.location.search);
+  //   const keywordFromURL = queryParams.get('keyword');
+  //   if (keywordFromURL) {
+  //     keywordInput.val(keywordFromURL);
+  //     handleSearch(keywordFromURL);
+  //   }
+  //
+  //   // 검색 폼 제출 처리
+  //   searchForm.submit(function(event) {
+  //     event.preventDefault();
+  //     console.log("submit발생");
+  //     const keyword = keywordInput.val().trim();
+  //     if (keyword === '') {
+  //       return;
+  //     }
+  //     handleSearch(keyword);
+  //     console.log("submit발생1");
+  //   });
+  //
+  //   // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
+  //   document.getElementById('selectAll').addEventListener('click', function () {
+  //     var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+  //     for (var i = 0; i < checkboxes.length; i++) {
+  //       checkboxes[i].checked = false;
+  //     }
+  //   });
+  //
+  //   // 다른 체크박스 클릭 시 "전체검색" 체크박스 상태 변경
+  //   var otherCheckboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
+  //   for (var i = 0; i < otherCheckboxes.length; i++) {
+  //     otherCheckboxes[i].addEventListener('click', function () {
+  //       document.getElementById('selectAll').checked = false;
+  //     });
+  //   }
+  // };
 </script>
 </body>
 </html>

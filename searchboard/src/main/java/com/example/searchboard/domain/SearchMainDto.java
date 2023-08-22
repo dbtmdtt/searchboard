@@ -13,6 +13,12 @@ public class SearchMainDto {
     private Pagination pagination;
     private List<String> forbiddenWord;
     private String keyword;
+    private String preKeyword;
+    private boolean reSearch;
+    private String sortOrder;
+    private List<String> searchCategory;
+    private String domain;
+    private String yhnCategory;
 
 
 

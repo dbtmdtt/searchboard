@@ -1,10 +1,7 @@
 package com.example.searchboard.controller;
 
+import com.example.searchboard.domain.*;
 import com.example.searchboard.service.SearchService;
-import com.example.searchboard.domain.MoisPagination;
-import com.example.searchboard.domain.ReSearchKeyword;
-import com.example.searchboard.domain.SearchMainDto;
-import com.example.searchboard.domain.YhnPagination;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +29,7 @@ public class SearchController {
 
 
     @GetMapping("/")
-    public String main(Model model, @RequestParam(required = false) String keyword,
+    public String main(Model model, Category category, @RequestParam(required = false) String keyword,
                        @RequestParam(required = false) List<String> searchCategory, @ModelAttribute ReSearchKeyword searchRequestDto, @AuthenticationPrincipal User user) throws IOException {
         SearchMainDto mainList = searchService.mainList(keyword, searchCategory);
 
@@ -44,6 +41,7 @@ public class SearchController {
         model.addAttribute("moisMain", mainList.getMoisMainList());
         model.addAttribute("pagination",mainList.getPagination());
         model.addAttribute("user",user.getUsername());
+        model.addAttribute("category", category.getCategory());
 
 
         return "searchMain";
@@ -63,24 +61,12 @@ public class SearchController {
     public List<String> forbiddenWords(){
         return searchService.searchForbiddenWords();
     }
+    //수동 추천 ajax
     @GetMapping("/recommend")
     @ResponseBody
     public List<String> recommend(String keyword) {
         return searchService.recommendWord(keyword);
     }
-
-
-
-//    @GetMapping("/moisPhoto")
-//    public String searchMoisPhoto(Model model, @RequestParam(required = false) String keyword,
-//                                   @RequestParam(required = false) List<String> searchCategory, @RequestParam(defaultValue = "1")int page) throws IOException {
-//        String domain1 = "mois_photo";
-//        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page);
-//        model.addAttribute("moisList", moisList.getMoisMainList());
-//        model.addAttribute("pagination",moisList.getPagination());
-//        return "moisPhoto";
-//    }
-
     // 오타 교정 ajax
     @GetMapping("/getTypoSuggest")
     @ResponseBody
@@ -98,6 +84,20 @@ public class SearchController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
+
+
+//    @GetMapping("/moisPhoto")
+//    public String searchMoisPhoto(Model model, @RequestParam(required = false) String keyword,
+//                                   @RequestParam(required = false) List<String> searchCategory, @RequestParam(defaultValue = "1")int page) throws IOException {
+//        String domain1 = "mois_photo";
+//        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page);
+//        model.addAttribute("moisList", moisList.getMoisMainList());
+//        model.addAttribute("pagination",moisList.getPagination());
+//        return "moisPhoto";
+//    }
+
 
 
     @GetMapping("/yhnPolitics")
