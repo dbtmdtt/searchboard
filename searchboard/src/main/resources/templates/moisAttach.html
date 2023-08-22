@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <link   rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous" />
   <link rel="icon" href="data:,">
   <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
     .nav-list {
       list-style: none;
@@ -66,10 +68,11 @@
       <button id="searchBtn" type="submit" style="margin-left:10px">
         <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
       </button>
-      <input type="checkbox" name="reSearch" value="reSearch" style="margin-right: 5px;" id="reSearch">결과 내 재검색
+      <input type="checkbox" name="reSearch" style="margin-right: 5px;" id="reSearch">결과 내 재검색
+        <div id="autocompleteResults" style="width: 300px; border: 1px solid #ccc; background-color: white; position: absolute; display: none;"></div>
     </div>
     <div style="display: flex; margin-top:20px">
-      <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked id="selectAll">전체검색
+      <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" id="selectAll">전체검색
       &nbsp&nbsp
       <input type="checkbox" name="searchCategory" value="title" style="margin-right: 5px;">제목 &nbsp&nbsp
       <input type="checkbox" name="searchCategory" value="content" style="margin-right: 5px;">내용 &nbsp&nbsp
@@ -78,6 +81,7 @@
       &nbsp&nbsp
     </div>
   </form>
+
 </div>
 <div style="margin : 0 auto;">
     <ul class="nav-list">
@@ -152,7 +156,7 @@
         <button id="sortByDate">날짜정렬</button>
         <button id="sortByScore">정확도정렬</button>
     </div>
-    <input type="text">
+
     <h4>
       <span>보도자료</span>
     </h4>
@@ -173,12 +177,12 @@
           <nav aria-label="Page navigation example" class="row flex justify-content-center" >
               <ul class="pagination">
                   <li class="page-item" th:if="${pagination.page != 1}" >
-                      <a class="page-link" th:href="@{/moisAttach/(page=1)}" aria-label="Previous" >
+                      <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
                           <span aria-hidden="true"><<</span>
                       </a>
                   </li>
                   <li class="page-item"  th:if="${pagination.startPage!= 1}">
-                      <a class="page-link" th:href="@{/moisAttach/(page=${pagination.prevBlock})}" aria-label="Previous">
+                      <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
                           <span aria-hidden="true"><</span>
                       </a>
                   </li>
@@ -186,26 +190,27 @@
                       <th:block>
                           <ul class="pagination">
                               <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
-                                  <a class="page-link"  th:href="@{/moisAttach/(page=${pageButton})}" th:text="${pageButton}"
+                                  <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
+                                     th:text="${pageButton}"
                                      th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
                               </li>
                           </ul>
                       </th:block>
                   </li>
                   <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
-                      <a class="page-link" th:href="@{/moisAttach/(page=${pagination.nextBlock})}" aria-label="Next">
+                      <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
                           <span aria-hidden="true">></span>
                       </a>
                   </li>
                   <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
-                      <a class="page-link" th:href="@{/moisAttach/(page=${pagination.totalPageCnt})}" aria-label="Previous">
+                      <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
                           <span aria-hidden="true">>></span>
                       </a>
                   </li>
               </ul>
           </nav>
 </div>
-</body>
+<!--</body>-->
 <script>
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -298,7 +303,116 @@
             return uri + separator + key + "=" + value;
         }
     }
+    // 현재 페이지의 URL을 얻기 위한 JavaScript 코드
+    var currentUrl = window.location.href;
+
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+
+    function goToPage(pageNumber) {
+        var newUrl = updateQueryStringParameter(currentUrl, 'page', pageNumber);
+        console.log(newUrl);
+        window.location.href = newUrl;
+    }
+    //자동완성
+    $(document).ready(function() {
+        const autocompleteResults = $('#autocompleteResults');
+        const keywordInput = $('#keyword');
+
+        keywordInput.on('input', function() {
+            const keyword = $(this).val();
+            if (keyword.trim() === '') {
+                autocompleteResults.hide();
+                return;
+            }
+
+            $.ajax({
+                url: '/search',
+                method: 'GET',
+                data: { keyword: keyword },
+                success: function(data) {
+                    autocompleteResults.empty();
+                    if (data) {
+                        const resultsList = $('<ul></ul>');
+
+                        data.forEach(function(keyword) {
+                            const listItem = $('<li style="list-style-type: none;  cursor: pointer;">' + keyword + '</li>');
+                            listItem.appendTo(resultsList);
+                        });
+
+                        // Clear previous results and append new ones
+                        autocompleteResults.empty().append(resultsList);
+                        autocompleteResults.show();
+                    }
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        // When a result item is clicked, fill the keyword input with its value
+        autocompleteResults.on('click', 'li', function() {
+            const clickedKeyword = $(this).text();
+            keywordInput.val(clickedKeyword);
+            autocompleteResults.hide();
+        });
+
+        $(document).on('click', function(event) {
+            if (!autocompleteResults.is(event.target) && !keywordInput.is(event.target) && autocompleteResults.has(event.target).length === 0) {
+                autocompleteResults.hide();
+            }
+        });
+    });
+    //금칙어
+    $(document).ready(function() {
+        const searchForm = $('#searchForm');
+        const keywordInput = $('#keyword');
+
+        searchForm.submit(function(event) {
+            event.preventDefault();
+
+            const keyword = keywordInput.val();
+            if (keyword.trim() === '') {
+                return;
+            }
+
+            $.ajax({
+                url: '/forbiddenWord',
+                type: 'GET',
+                success: function(forbiddenWords) {
+                    console.log(forbiddenWords);
+                    if (forbiddenWords.includes(keyword)) {
+                        // Show alert for forbidden word
+                        console.log('금칙어');
+                        alert('금칙어가 포함되어 있습니다.');
+                    } else {
+                        // Proceed with search or other actions
+                        searchForm.unbind('submit').submit();
+                    }
+                },
+                error: function(error) {
+                    // console.error('Error:', error);
+                }
+            });
+        });
+    });
+
+
+
+
+
+
+
 
 
 </script>
+</body>
 </html>

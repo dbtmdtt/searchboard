@@ -171,7 +171,41 @@
         </li>
     </ul>
 
-    </ul>
+    <nav aria-label="Page navigation example" class="row flex justify-content-center" >
+        <ul class="pagination">
+            <li class="page-item" th:if="${pagination.page != 1}" >
+                <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
+                    <span aria-hidden="true"><<</span>
+                </a>
+            </li>
+            <li class="page-item"  th:if="${pagination.startPage!= 1}">
+                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
+                    <span aria-hidden="true"><</span>
+                </a>
+            </li>
+            <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
+                <th:block>
+                    <ul class="pagination">
+                        <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
+                            <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
+                               th:text="${pageButton}"
+                               th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
+                        </li>
+                    </ul>
+                </th:block>
+            </li>
+            <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
+                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
+                    <span aria-hidden="true">></span>
+                </a>
+            </li>
+            <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
+                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
+                    <span aria-hidden="true">>></span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 </div>
 
@@ -233,6 +267,24 @@
         otherCheckboxes[i].addEventListener('click', function () {
             document.getElementById('selectAll').checked = false;
         });
+    }
+    // 현재 페이지의 URL을 얻기 위한 JavaScript 코드
+    var currentUrl = window.location.href;
+
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+
+    function goToPage(pageNumber) {
+        var newUrl = updateQueryStringParameter(currentUrl, 'page', pageNumber);
+        console.log(newUrl);
+        window.location.href = newUrl;
     }
 
 </script>
