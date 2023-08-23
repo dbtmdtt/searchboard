@@ -157,8 +157,8 @@
         <button id="sortByDate" value="dateDesc" onclick="sort(value)">날짜정렬</button>
         <button id="sortByScore" value="accuracyDesc" onclick="sort(value)">정확도정렬</button>
         <button onclick="showRadioButton()">조회기간</button>
-        <div id="radioDiv">
-          <input type="radio" name="chk_info" >전체
+        <div id="radioDiv" style="display:none;">
+          <input type="radio" name="chk_info" value="0" >전체
           <input type="radio" name="chk_info" value="1">1일
           <input type="radio" name="chk_info" value="7">일주일
           <input type="radio" name="chk_info" value="30">한달
@@ -253,6 +253,8 @@
       });
     });
   });
+
+
   function sort() {
     const currentUrl = new URL(window.location.href);
     const queryParams = new URLSearchParams(currentUrl.search);
@@ -290,8 +292,13 @@
     const directInputRadio = document.getElementById("directInput");
 
     let periodStart, periodEnd;
-
-    if (directInputRadio.checked) {
+    const selectedRadio = document.querySelector('input[name="chk_info"]:checked');
+    if (selectedRadio && selectedRadio.value === "0") {
+      // "전체" 옵션을 선택한 경우
+      const currentDate = new Date();
+      periodStart = "2000-01-01";
+      periodEnd = currentDate.toISOString().split('T')[0];
+    } else if (directInputRadio.checked) {
       periodStart = startDate;
       periodEnd = endDate;
     } else {
@@ -336,6 +343,38 @@
       checkbox.checked = true;
     }
   });
+
+  function search() {
+    const checkReSearch = document.getElementById("reSearch").checked;
+      console.log(checkReSearch);
+    var currentUrl = new URL(window.location.href);
+    console.log(currentUrl);
+    var keyword = document.getElementById("keyword").value;
+    // var url;
+    if (checkReSearch) {
+      const preKeyword = currentUrl.searchParams.get("preKeyword");
+
+      if (preKeyword) {
+        keyword = preKeyword + "," + keyword;
+        console.log("jear", keyword);
+        currentUrl.searchParams.set("preKeyword", keyword);
+      }else{
+        console.log("hear", keyword);
+        currentUrl.searchParams.set("preKeyword", keyword);
+        console.log("asdf",currentUrl);
+
+      }
+    } else {
+      console.log("false");
+      const preKeyword = currentUrl.searchParams.get("preKeyword");
+
+      if (preKeyword !== null) {
+        currentUrl.searchParams.delete("preKeyword");
+      }
+    }
+    console.log("url", currentUrl);
+    window.location.href = currentUrl;
+  }
   function updateQueryStringParameter(uri, key, value) {
     const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
     const separator = uri.indexOf("?") !== -1 ? "&" : "?";
@@ -413,9 +452,8 @@
 
     const searchForm = $('#searchForm');
 
-    function search() {
-      $("#searchForm").submit();
-    }
+
+
   $(document).ready(function () {
 
     const keyword = keywordInput.val();

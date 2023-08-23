@@ -7,6 +7,7 @@
             href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
             integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
             crossorigin="anonymous" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="icon" href="data:,">
     <title>Title</title>
     <style>
@@ -56,17 +57,19 @@
 
 </head>
 <body>
-<div style="margin-top: 10px; margin-left:10px">
-    <p> user님 반갑습니다.</p>
+<div style="margin-top: 10px; margin-left:10px; display: flex;">
+    <p th:text="${user}" style="font-weight : bold"></p>&nbsp;
+    <p> 님 반갑습니다.</p>
 </div>
 <div style="margin-bottom: 20px; margin-top: 10px">
     <form id="searchForm" style="display: flex; align-items: center; justify-content: center; flex-direction: column" method="get">
         <div>
             <input type="text" style="width:300px" name="keyword" id="keyword"/>
-            <button id="searchBtn" type="submit" style="margin-left:10px">
+            <button type="button" id="searchBtn" onclick="search()" style="margin-left:10px">
                 <img src="searchboard/searchboard/src/main/resources/static/search.png"/>
             </button>
-            <input type="checkbox" name="reSearch" value="reSearch" style="margin-right: 5px;" id="reSearch">결과 내 재검색
+            <input type="checkbox" name="reSearch" style="margin-right: 5px;" id="reSearch">결과 내 재검색
+            <div id="autocompleteResults" style="width: 300px; border: 1px solid #ccc; background-color: white; position: absolute; display: none;"></div>
         </div>
         <div style="display: flex; margin-top:20px">
             <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked id="selectAll">전체검색
@@ -82,11 +85,11 @@
 <div style="margin : 0 auto;">
     <ul class="nav-list">
         <li class="nav-item">
-            <a class="nav-link" href="/">통합검색</a>
+            <a class="nav-link" href="/" >통합검색</a>
             <span class="separator"></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/moisAttach" >보도자료</a>
+            <a class="nav-link" href="/moisAttach">보도자료</a>
             <span class="separator"></span>
         </li>
 
@@ -123,7 +126,7 @@
             <span class="separator"></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/yhnCulture" style="text-decoration: underline; text-decoration-thickness: 3px; ">문화</a>
+            <a class="nav-link" href="/yhnCulture" style="text-decoration: underline; text-decoration-thickness: 3px;">문화</a>
             <span class="separator"></span>
         </li>
         <li class="nav-item">
@@ -147,70 +150,105 @@
         </li>
     </ul>
 </div>
-<div style="margin: 30px auto; width:60%;">
-    <h4>
-        <span>문화</span>
-    </h4>
-    <ul style="list-style-type: none;">
-        <li th:each="yhn : ${yhnList}">
-            <div style="display: flex; align-items: center; margin-top: 20px;">
-                <img th:src="${yhn.thumbnailImg}"
-                     style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
-                <div style="width: 85%">
-                    <a th:href="${yhn.url}">
-                        <h5 th:utext="${yhn.title}"></h5>
-                    </a>
-                    <p th:utext="${yhn.content}"
-                       style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
-                    <div style="display:flex">
-                        <small th:utext="${yhn.writer}"></small>
-                        <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
-                    </div>
-                </div>
+
+<div style="display:flex;">
+    <div style="margin: 30px auto; width:60%;">
+        <div>
+            <button id="sortByDate" value="dateDesc" onclick="sort(value)">날짜정렬</button>
+            <button id="sortByScore" value="accuracyDesc" onclick="sort(value)">정확도정렬</button>
+            <button onclick="showRadioButton()">조회기간</button>
+            <div id="radioDiv" style="display:none;">
+                <input type="radio" name="chk_info" value="0" >전체
+                <input type="radio" name="chk_info" value="1">1일
+                <input type="radio" name="chk_info" value="7">일주일
+                <input type="radio" name="chk_info" value="30">한달
+                <input type="radio" name="chk_info" value="365">1년
+                <input type="radio" name="chk_info" id="directInput">직접입력
+                <button onclick="searchPeriod()">적용</button>
             </div>
-        </li>
-    </ul>
+            <div id="date" style="display : none;">
+                <input type="date" id="startDate">
+                <input type="date" id="endDate">
+            </div>
+        </div>
 
-    <nav aria-label="Page navigation example" class="row flex justify-content-center" >
-        <ul class="pagination">
-            <li class="page-item" th:if="${pagination.page != 1}" >
-                <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
-                    <span aria-hidden="true"><<</span>
-                </a>
-            </li>
-            <li class="page-item"  th:if="${pagination.startPage!= 1}">
-                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
-                    <span aria-hidden="true"><</span>
-                </a>
-            </li>
-            <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
-                <th:block>
-                    <ul class="pagination">
-                        <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
-                            <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
-                               th:text="${pageButton}"
-                               th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
-                        </li>
-                    </ul>
-                </th:block>
-            </li>
-            <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
-                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
-                    <span aria-hidden="true">></span>
-                </a>
-            </li>
-            <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
-                <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
-                    <span aria-hidden="true">>></span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+            <h4>
+                <span>문화</span>
+
+            </h4>
+            <ul style="list-style-type: none;">
+                <li th:each="yhn : ${yhnList}" >
+                    <div style="display: flex; align-items: center; margin-top: 20px;">
+                        <img th:src="${yhn.thumbnailImg}"
+                             style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
+                        <div style="width: 85%">
+                            <a th:href="${yhn.url}">
+                                <h5 th:utext="${yhn.title}"></h5>
+                            </a>
+                            <p th:utext="${yhn.content}"
+                               style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+                            <div style="display:flex">
+                                <small th:utext="${yhn.writer}"></small>
+                                <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <nav aria-label="Page navigation example" class="row flex justify-content-center" >
+                <ul class="pagination">
+                    <li class="page-item" th:if="${pagination.page != 1}" >
+                        <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
+                            <span aria-hidden="true"><<</span>
+                        </a>
+                    </li>
+                    <li class="page-item"  th:if="${pagination.startPage!= 1}">
+                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
+                            <span aria-hidden="true"><</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
+                        <th:block>
+                            <ul class="pagination">
+                                <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
+                                    <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
+                                       th:text="${pageButton}"
+                                       th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
+                                </li>
+                            </ul>
+                        </th:block>
+                    </li>
+                    <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
+                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
+                            <span aria-hidden="true">></span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
+                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
+                            <span aria-hidden="true">>></span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+    </div>
+    <div style="margin-top: 30px; margin-right:20px;">
+        <p>수동추천단어</p>
+        <div id="recommend"></div>
+        <div id="searchResults" style="display: none;"></div>
+    </div>
 </div>
 </div>
 
-</body>
+
 <script>
+
+    function goToPage(pageNumber) {
+        var currentUrl = window.location.href;
+        var newUrl = updateQueryStringParameter(currentUrl, 'page', pageNumber);
+        console.log(newUrl);
+        window.location.href = newUrl;
+    }
     document.addEventListener("DOMContentLoaded", function() {
         const navLinks = document.querySelectorAll(".nav-link");
 
@@ -229,7 +267,71 @@
             });
         });
     });
+    function sort() {
+        const currentUrl = new URL(window.location.href);
+        const queryParams = new URLSearchParams(currentUrl.search);
+        const sortOrder = queryParams.get("sortOrder");
 
+        if (sortOrder === "dateDesc" || sortOrder === "dateAsc" || sortOrder === null) {
+            // 현재 정렬 방식에 따라 반대로 변경
+            currentSortOrder = sortOrder === "dateDesc" ? "dateAsc" : "dateDesc";
+        } else if (sortOrder === "accuracyDesc" || sortOrder === "accuracyAsc") {
+            currentSortOrder = sortOrder === "accuracyDesc" ? "accuracyAsc" : "accuracyDesc";
+        }
+
+        // URL 업데이트
+        const updatedUrl = updateQueryStringParameter(window.location.href, "sortOrder", currentSortOrder);
+        window.location.href = updatedUrl;
+
+
+    }
+
+    //조회기간
+    function showRadioButton(){
+        var radioDiv = $("#radioDiv");
+        radioDiv.css("display","block");
+    }
+
+    const directInputRadio = document.getElementById("directInput");
+    const dateDiv = document.getElementById("date");
+
+    directInputRadio.addEventListener("click", function() {
+        dateDiv.style.display = directInputRadio.checked ? "flex" : "none";
+    });
+    function searchPeriod(){
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const directInputRadio = document.getElementById("directInput");
+
+        let periodStart, periodEnd;
+        const selectedRadio = document.querySelector('input[name="chk_info"]:checked');
+        if (selectedRadio && selectedRadio.value === "0") {
+            // "전체" 옵션을 선택한 경우
+            const currentDate = new Date();
+            periodStart = "2000-01-01";
+            periodEnd = currentDate.toISOString().split('T')[0];
+        } else if (directInputRadio.checked) {
+            periodStart = startDate;
+            periodEnd = endDate;
+        } else {
+            const selectedRadio = document.querySelector('input[name="chk_info"]:checked');
+            if (selectedRadio) {
+                const days = parseInt(selectedRadio.value);
+                const currentDate = new Date();
+
+                periodEnd = currentDate.toISOString().split('T')[0];
+                const startDateObj = new Date(currentDate);
+                startDateObj.setDate(currentDate.getDate() - days);
+                periodStart = startDateObj.toISOString().split('T')[0];
+            }
+        }
+
+        // URL 업데이트
+        const updatedUrl = updateQueryStringParameter(window.location.href, "periodStart", periodStart);
+        const finalUrl = updateQueryStringParameter(updatedUrl, "periodEnd", periodEnd);
+        console.log(finalUrl);
+        window.location.href = finalUrl;
+    }
     // 선택된 카테고리 가져오는 함수
     function getSelectedCategories() {
         const searchCategories = document.getElementsByName("searchCategory");
@@ -253,6 +355,15 @@
             checkbox.checked = true;
         }
     });
+    function updateQueryStringParameter(uri, key, value) {
+        const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        const separator = uri.indexOf("?") !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, "$1" + key + "=" + value + "$2");
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
     // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
     document.getElementById('selectAll').addEventListener('click', function () {
         var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
@@ -268,24 +379,154 @@
             document.getElementById('selectAll').checked = false;
         });
     }
-    // 현재 페이지의 URL을 얻기 위한 JavaScript 코드
-    var currentUrl = window.location.href;
 
-    function updateQueryStringParameter(uri, key, value) {
-        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-        if (uri.match(re)) {
-            return uri.replace(re, '$1' + key + "=" + value + '$2');
-        } else {
-            return uri + separator + key + "=" + value;
+
+    const autocompleteResults = $('#autocompleteResults');
+    const keywordInput = $('#keyword');
+
+    keywordInput.on('input', function() {
+        const keyword = $(this).val();
+        if (keyword.trim() === '') {
+            autocompleteResults.hide();
+            return;
         }
-    }
 
-    function goToPage(pageNumber) {
-        var newUrl = updateQueryStringParameter(currentUrl, 'page', pageNumber);
-        console.log(newUrl);
-        window.location.href = newUrl;
+        $.ajax({
+            url: '/search',
+            method: 'GET',
+            data: { keyword: keyword },
+            success: function(data) {
+                autocompleteResults.empty();
+                if (data) {
+                    const resultsList = $('<ul></ul>');
+
+                    data.forEach(function(keyword) {
+                        const listItem = $('<li style="list-style-type: none;  cursor: pointer;">' + keyword + '</li>');
+                        listItem.appendTo(resultsList);
+                    });
+
+                    // Clear previous results and append new ones
+                    autocompleteResults.empty().append(resultsList);
+                    autocompleteResults.show();
+                }
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+
+    autocompleteResults.on('click', 'li', function() {
+        const clickedKeyword = $(this).text();
+        keywordInput.val(clickedKeyword);
+        autocompleteResults.hide();
+    });
+
+    $(document).on('click', function(event) {
+        if (!autocompleteResults.is(event.target) && !keywordInput.is(event.target) && autocompleteResults.has(event.target).length === 0) {
+            autocompleteResults.hide();
+        }
+    });
+
+
+    const searchForm = $('#searchForm');
+
+    function search() {
+        $("#searchForm").submit();
     }
+    $(document).ready(function () {
+
+        const keyword = keywordInput.val();
+        if (keyword.trim() === '') {
+            return;
+        }
+
+        $.ajax({
+            url: '/forbiddenWord',
+            type: 'GET',
+            success: function (forbiddenWords) {
+                console.log(forbiddenWords);
+                if (forbiddenWords.includes(keyword)) {
+                    // Show alert for forbidden word
+                    console.log('금칙어');
+                    alert('금칙어가 포함되어 있습니다.');
+
+                } else {
+                    // Proceed with search or other actions
+                    // searchForm.unbind('submit').submit();
+                }
+            },
+            error: function (error) {
+                // console.error('Error:', error);
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
+            data: {
+                search: keyword
+            },
+            success: function (response) {
+                if (response) {
+                    // 검색어 확인 메시지 표시
+                    var searchResultsDiv = $("#searchResults");
+                    searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
+                    searchResultsDiv.css("display", "block");
+                    searchResultsDiv.show;
+
+                    // 새 이벤트 추가
+                    $("#confirmButton").off("click").on("click", function (e) {
+                        e.preventDefault();
+                        // 검색어 변경 후 다시 검색 폼 제출
+                        $("#keyword").val(response);
+
+                        // 검색어 변경 후 서버로 검색 요청
+                        $("#searchForm").submit();
+                    });
+                } else {
+                    $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
+                }
+            },
+            error: function () {
+                $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/recommend",
+            data: {
+                keyword: keyword
+            },
+            success: function (response) {
+                if (response && response.length > 0) {
+                    var recommendDiv = $("#recommend");
+                    recommendDiv.empty(); // 기존 내용 비우기
+
+                    // 추천 단어 리스트 출력
+                    var ul = $("<ul>");
+                    $.each(response, function (index, word) {
+                        var li = $("<li >").text(word);
+                        ul.append(li);
+                    });
+                    recommendDiv.append(ul);
+                } else {
+                    $("#recommend").html("<p>추천 단어가 없습니다.</p>");
+                }
+            },
+            error: function () {
+                $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
+            }
+        });
+    });
+
 
 </script>
+</body>
 </html>
+
+
+
+
+
