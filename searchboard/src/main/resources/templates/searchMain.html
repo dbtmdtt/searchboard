@@ -150,16 +150,31 @@
     </li>
   </ul>
 </div>
-  <div id="searchResults" style="display: none;"></div>
+
   <div style="display:flex;">
     <div style="margin: 30px auto; width:60%;">
+      <div>
+        <button id="sortByDate" value="dateDesc" onclick="sort(value)">날짜정렬</button>
+        <button id="sortByScore" value="accuracyDesc" onclick="sort(value)">정확도정렬</button>
+        <button onclick="showRadioButton()">조회기간</button>
+        <div id="radioDiv">
+          <input type="radio" name="chk_info" >전체
+          <input type="radio" name="chk_info" value="1">1일
+          <input type="radio" name="chk_info" value="7">일주일
+          <input type="radio" name="chk_info" value="30">한달
+          <input type="radio" name="chk_info" value="365">1년
+          <input type="radio" name="chk_info" id="directInput">직접입력
+          <button onclick="searchPeriod()">적용</button>
+        </div>
+        <div id="date" style="display : none;">
+          <input type="date" id="startDate">
+          <input type="date" id="endDate">
+        </div>
+      </div>
       <ul th:each="domain : ${domains}">
         <h4>
           <span th:if="${domain == 'mois_attach'}">보도자료</span>
           <span th:if="${domain == 'mois_photo'}">사진자료</span>
-          <!--                        (<span th:text="${moisCount['mois_photo']}"></span>건)</span>-->
-
-          <!--                        (<span th:text="${moisCount['mois_attach']}"></span>건)</span>-->
         </h4>
         <ul style="list-style-type: none;">
           <li th:each="mois : ${moisMain}" th:if="${mois.domain} == ${domain}">
@@ -182,9 +197,8 @@
       <ul th:each="category : ${categories}">
         <h4>
           <span th:if="${category == '전체기사'}">북한</span>
-          <!--                        (<span th:text="${yhnCount['전체기사']}"></span>건)</span>-->
           <span th:unless="${category == '전체기사'}" th:text="${category}"></span>
-          <!--                        (<span th:text="${yhnCount[category]}"></span>건)</span>-->
+
         </h4>
         <ul style="list-style-type: none;">
           <li th:each="yhn : ${yhnMain}" th:if="${yhn.category_one_depth == category}">
@@ -211,8 +225,10 @@
       </ul>
 
     </div>
-  <div>
+  <div style="margin-top: 30px; margin-right:20px;">
+    <p>수동추천단어</p>
     <div id="recommend"></div>
+    <div id="searchResults" style="display: none;"></div>
   </div>
     </div>
   </div>
@@ -237,7 +253,66 @@
       });
     });
   });
+  function sort() {
+    const currentUrl = new URL(window.location.href);
+    const queryParams = new URLSearchParams(currentUrl.search);
+    const sortOrder = queryParams.get("sortOrder");
 
+    if (sortOrder === "dateDesc" || sortOrder === "dateAsc" || sortOrder === null) {
+      // 현재 정렬 방식에 따라 반대로 변경
+      currentSortOrder = sortOrder === "dateDesc" ? "dateAsc" : "dateDesc";
+    } else if (sortOrder === "accuracyDesc" || sortOrder === "accuracyAsc") {
+      currentSortOrder = sortOrder === "accuracyDesc" ? "accuracyAsc" : "accuracyDesc";
+    }
+
+    // URL 업데이트
+    const updatedUrl = updateQueryStringParameter(window.location.href, "sortOrder", currentSortOrder);
+    window.location.href = updatedUrl;
+
+
+  }
+
+  //조회기간
+  function showRadioButton(){
+    var radioDiv = $("#radioDiv");
+    radioDiv.css("display","block");
+  }
+
+  const directInputRadio = document.getElementById("directInput");
+  const dateDiv = document.getElementById("date");
+
+  directInputRadio.addEventListener("click", function() {
+    dateDiv.style.display = directInputRadio.checked ? "flex" : "none";
+  });
+  function searchPeriod(){
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const directInputRadio = document.getElementById("directInput");
+
+    let periodStart, periodEnd;
+
+    if (directInputRadio.checked) {
+      periodStart = startDate;
+      periodEnd = endDate;
+    } else {
+      const selectedRadio = document.querySelector('input[name="chk_info"]:checked');
+      if (selectedRadio) {
+        const days = parseInt(selectedRadio.value);
+        const currentDate = new Date();
+
+        periodEnd = currentDate.toISOString().split('T')[0];
+        const startDateObj = new Date(currentDate);
+        startDateObj.setDate(currentDate.getDate() - days);
+        periodStart = startDateObj.toISOString().split('T')[0];
+      }
+    }
+
+      // URL 업데이트
+    const updatedUrl = updateQueryStringParameter(window.location.href, "periodStart", periodStart);
+    const finalUrl = updateQueryStringParameter(updatedUrl, "periodEnd", periodEnd);
+    console.log(finalUrl);
+    window.location.href = finalUrl;
+  }
   // 선택된 카테고리 가져오는 함수
   function getSelectedCategories() {
     const searchCategories = document.getElementsByName("searchCategory");
@@ -261,6 +336,15 @@
       checkbox.checked = true;
     }
   });
+  function updateQueryStringParameter(uri, key, value) {
+    const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    const separator = uri.indexOf("?") !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+      return uri.replace(re, "$1" + key + "=" + value + "$2");
+    } else {
+      return uri + separator + key + "=" + value;
+    }
+  }
   // "전체검색" 체크박스 클릭 시 다른 체크박스 상태 변경
   document.getElementById('selectAll').addEventListener('click', function () {
     var checkboxes = document.querySelectorAll('input[name="searchCategory"]:not(#selectAll)');
@@ -331,87 +415,6 @@
 
     function search() {
       $("#searchForm").submit();
-      // const keyword = keywordInput.val();
-      // if (keyword.trim() === '') {
-      //   return;
-      // }
-      //
-      // $.ajax({
-      //   url: '/forbiddenWord',
-      //   type: 'GET',
-      //   success: function (forbiddenWords) {
-      //     console.log(forbiddenWords);
-      //     if (forbiddenWords.includes(keyword)) {
-      //       // Show alert for forbidden word
-      //       console.log('금칙어');
-      //       alert('금칙어가 포함되어 있습니다.');
-      //     } else {
-      //       // Proceed with search or other actions
-      //       // searchForm.unbind('submit').submit();
-      //     }
-      //   },
-      //   error: function (error) {
-      //     // console.error('Error:', error);
-      //   }
-      // });
-      // $.ajax({
-      //   type: "GET",
-      //   url: "/getTypoSuggest", // 오타 교정 컨트롤러의 URL에 맞게 수정
-      //   data: {
-      //     search: keyword
-      //   },
-      //   success: function (response) {
-      //     if (response) {
-      //       // 검색어 확인 메시지 표시
-      //       var searchResultsDiv = $("#searchResults");
-      //       searchResultsDiv.html("<p>오타 교정된 단어: " + response + "</p><button id='confirmButton'>이 단어로 검색</button>");
-      //       searchResultsDiv.css("display", "block");
-      //       searchResultsDiv.show;
-      //
-      //       // 새 이벤트 추가
-      //       $("#confirmButton").off("click").on("click", function (e) {
-      //         e.preventDefault();
-      //         // 검색어 변경 후 다시 검색 폼 제출
-      //         $("#keyword").val(response);
-      //
-      //         // 검색어 변경 후 서버로 검색 요청
-      //         // $("#searchForm").submit();
-      //       });
-      //     } else {
-      //       $("#searchResults").html("<p>검색 결과가 없습니다.</p>");
-      //     }
-      //   },
-      //   error: function () {
-      //     $("#searchResults").html("<p>검색 중 오류가 발생했습니다.</p>");
-      //   }
-      // });
-      //
-      // $.ajax({
-      //   type: "GET",
-      //   url: "/recommend",
-      //   data: {
-      //     keyword: keyword
-      //   },
-      //   success: function (response) {
-      //     if (response && response.length > 0) {
-      //       var recommendDiv = $("#recommend");
-      //       recommendDiv.empty(); // 기존 내용 비우기
-      //
-      //       // 추천 단어 리스트 출력
-      //       var ul = $("<ul>");
-      //       $.each(response, function (index, word) {
-      //         var li = $("<li>").text(word);
-      //         ul.append(li);
-      //       });
-      //       recommendDiv.append(ul);
-      //     } else {
-      //       $("#recommend").html("<p>추천 단어가 없습니다.</p>");
-      //     }
-      //   },
-      //   error: function () {
-      //     $("#recommend").html("<p>추천 단어를 불러오는 중 오류가 발생했습니다.</p>");
-      //   }
-      // });
     }
   $(document).ready(function () {
 
@@ -484,7 +487,7 @@
           // 추천 단어 리스트 출력
           var ul = $("<ul>");
           $.each(response, function (index, word) {
-            var li = $("<li>").text(word);
+            var li = $("<li >").text(word);
             ul.append(li);
           });
           recommendDiv.append(ul);

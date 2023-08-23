@@ -320,89 +320,8 @@
         console.log(newUrl);
         window.location.href = newUrl;
     }
-    //자동완성
-    $(document).ready(function() {
-        const autocompleteResults = $('#autocompleteResults');
-        const keywordInput = $('#keyword');
 
-        keywordInput.on('input', function() {
-            const keyword = $(this).val();
-            if (keyword.trim() === '') {
-                autocompleteResults.hide();
-                return;
-            }
 
-            $.ajax({
-                url: '/search',
-                method: 'GET',
-                data: { keyword: keyword },
-                success: function(data) {
-                    autocompleteResults.empty();
-                    if (data) {
-                        const resultsList = $('<ul></ul>');
-
-                        data.forEach(function(keyword) {
-                            const listItem = $('<li style="list-style-type: none;  cursor: pointer;">' + keyword + '</li>');
-                            listItem.appendTo(resultsList);
-                        });
-
-                        // Clear previous results and append new ones
-                        autocompleteResults.empty().append(resultsList);
-                        autocompleteResults.show();
-                    }
-                },
-                error: function(error) {
-                    console.error('Error:', error);
-                }
-            });
-        });
-
-        // When a result item is clicked, fill the keyword input with its value
-        autocompleteResults.on('click', 'li', function() {
-            const clickedKeyword = $(this).text();
-            keywordInput.val(clickedKeyword);
-            autocompleteResults.hide();
-        });
-
-        $(document).on('click', function(event) {
-            if (!autocompleteResults.is(event.target) && !keywordInput.is(event.target) && autocompleteResults.has(event.target).length === 0) {
-                autocompleteResults.hide();
-            }
-        });
-    });
-    //금칙어
-    $(document).ready(function() {
-        const searchForm = $('#searchForm');
-        const keywordInput = $('#keyword');
-
-        searchForm.submit(function(event) {
-            event.preventDefault();
-
-            const keyword = keywordInput.val();
-            if (keyword.trim() === '') {
-                return;
-            }
-
-            $.ajax({
-                url: '/forbiddenWord',
-                type: 'GET',
-                success: function(forbiddenWords) {
-                    console.log(forbiddenWords);
-                    if (forbiddenWords.includes(keyword)) {
-                        // Show alert for forbidden word
-                        console.log('금칙어');
-                        alert('금칙어가 포함되어 있습니다.');
-                    } else {
-                        // Proceed with search or other actions
-                        searchForm.unbind('submit').submit();
-                    }
-                },
-                error: function(error) {
-                    // console.error('Error:', error);
-                }
-            });
-        });
-    });
 
 
 

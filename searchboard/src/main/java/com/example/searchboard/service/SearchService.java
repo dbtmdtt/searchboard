@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,23 +41,54 @@ public class SearchService {
         this.client = client;
     }
 
-    public SearchMainDto mainList(String keyword,List<String> searchCategory) throws IOException {
+    public SearchMainDto mainList(String keyword,List<String> searchCategory, String sort, String startPeriod, String endPeriod) throws IOException {
         String[] moisDomain = {"mois_photo", "mois_attach"};
         String[] yhnCategories = {"정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프", "연예", "스포츠", "오피니언", "사람들"};
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
         SearchRequest searchRequest_yhn = new SearchRequest("yhn_index");
         SearchMainDto resultDto = new SearchMainDto();
-        SearchSourceBuilder commonSearchSourceBuilder = new SearchSourceBuilder();
-        commonSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        SearchSourceBuilder mainBuilder = new SearchSourceBuilder()
-                .sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
-                .size(5)
-                .trackTotalHits(true); // 개수 표시 위함
+        SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
+        log.debug("start : {}", startPeriod);
+        log.debug("end : {}", endPeriod);
+        if (startPeriod != null && !startPeriod.isEmpty() && endPeriod != null && !endPeriod.isEmpty()) {
+            log.debug("jere");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate startDate = LocalDate.parse(startPeriod, formatter);
+            LocalDate endDate = LocalDate.parse(endPeriod, formatter);
+            RangeQueryBuilder dateRangeQuery = QueryBuilders
+                    .rangeQuery("write_date")
+                    .format("yyyy-MM-dd")
+                    .gte(startDate)
+                    .lte(endDate);
+
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().filter(dateRangeQuery);
+            log.debug("bool:{}", mainBuilder.query(boolQuery));
+            mainBuilder.query(boolQuery);
+        }
+
+        if(sort.equals("dateDesc")){
+            mainBuilder.sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
+                    .size(5)
+                    .trackTotalHits(true); // 개수 표시 위함
+        }else if(sort.equals("dateAsc")){
+            mainBuilder.sort(SortBuilders.fieldSort("write_date").order(SortOrder.ASC))
+                    .size(5)
+                    .trackTotalHits(true); // 개수 표시 위함;
+        }else if(sort.equals("accuracyDesc")){
+            mainBuilder.sort(SortBuilders.scoreSort().order(SortOrder.DESC))
+                    .size(5)
+                    .trackTotalHits(true);
+        }else{
+            mainBuilder.sort(SortBuilders.scoreSort().order(SortOrder.ASC))
+                    .size(5)
+                    .trackTotalHits(true);
+        }
+
+
+
+        log.debug("searche:{}", searchRequest_mois);
 
         if(keyword != null && !keyword.isEmpty()) {
-            //키워드가 있을경우 키워드로 검색
-            // Check if keyword is in forbiddenWords list
-            recommendWord(keyword);
 
             resultDto.setMoisMainList(searchKeywordMois(keyword, moisDomain, searchCategory,searchRequest_mois, mainBuilder));
             resultDto.setYhnMainList(searchKeywordYhn(keyword, yhnCategories, searchCategory,searchRequest_yhn, mainBuilder));
@@ -144,13 +177,16 @@ public class SearchService {
     ////통합검색 메인 출력
     private List<MoisDto> getMoisMainList(SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder, String[] moisDomain) throws IOException {
         List<MoisDto> moisMainList = new ArrayList<>();
-
+        log.debug("main:{}",mainBuilder);
         for (String domain : moisDomain) {
             mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
             SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
+
             log.debug("filecontet:{}", searchRequest_mois);
             moisMainList.addAll(moisList(moisResponse.getHits().getHits()));
         }
+
+        log.debug("filecontsssssset:{}", searchRequest_mois);
 
         return moisMainList;
     }
@@ -172,7 +208,6 @@ public class SearchService {
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
         Pagination pagination = new Pagination(10000, page);
         if(sort.equals("dateDesc")){
-
             mainBuilder.sort(SortBuilders.fieldSort("write_date").order(SortOrder.DESC))
                     .from(pagination.getStartIndex())
                     .size(10)

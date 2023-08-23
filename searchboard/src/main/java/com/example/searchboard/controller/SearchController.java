@@ -29,10 +29,13 @@ public class SearchController {
 
 
     @GetMapping("/")
-    public String main(Model model, Category category, @RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) List<String> searchCategory, @ModelAttribute ReSearchKeyword searchRequestDto, @AuthenticationPrincipal User user) throws IOException {
-        SearchMainDto mainList = searchService.mainList(keyword, searchCategory);
-
+    public String main(Model model, @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) List<String> searchCategory, @ModelAttribute ReSearchKeyword searchRequestDto,
+                       @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder,
+                       @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd) throws IOException {
+        SearchMainDto mainList = searchService.mainList(keyword, searchCategory,sortOrder,periodStart, periodEnd);
+        log.debug("start1 :{}", periodStart);
+        log.debug("start2{}", periodEnd);
         List<String> domains = Arrays.asList("mois_photo", "mois_attach");
         List<String> categories = Arrays.asList("정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프","연예", "스포츠", "오피니언", "사람들");
         model.addAttribute("domains", domains);
@@ -41,15 +44,12 @@ public class SearchController {
         model.addAttribute("moisMain", mainList.getMoisMainList());
         model.addAttribute("pagination",mainList.getPagination());
         model.addAttribute("user",user.getUsername());
-        model.addAttribute("category", category.getCategory());
-
-
         return "searchMain";
     }
     @GetMapping("/moisAttach")
     public String searchMoisAttach(Model model, @RequestParam(required = false) String keyword,
                                    @RequestParam(required = false) List<String> searchCategory, @RequestParam(defaultValue = "1")int page,
-                                   @RequestParam(defaultValue = "dateDesc") String sortOrder) throws IOException {
+                                   @RequestParam(required=false) String sortOrder) throws IOException {
         String domain1 = "mois_attach";
         MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page, sortOrder);
         model.addAttribute("moisList", moisList.getMoisMainList());
