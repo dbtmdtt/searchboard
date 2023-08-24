@@ -33,7 +33,7 @@ public class SearchController {
                        @RequestParam(required = false) List<String> searchCategory,
                        @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder,
                        @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd, @RequestParam(required = false) String preKeyword) throws IOException {
-        SearchMainDto mainList = searchService.mainList(keyword, searchCategory,sortOrder,periodStart, periodEnd, preKeyword);
+        SearchMainDto mainList = searchService.mainList(keyword, searchCategory,sortOrder,periodStart, periodEnd, preKeyword, user.getUsername());
         List<String> domains = Arrays.asList("mois_photo", "mois_attach");
         List<String> categories = Arrays.asList("정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프","연예", "스포츠", "오피니언", "사람들");
         model.addAttribute("domains", domains);
@@ -51,7 +51,7 @@ public class SearchController {
                                    @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd) throws IOException {
         String domain1 = "mois_attach";
 
-        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page, sortOrder ,periodStart, periodEnd);
+        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page, sortOrder ,periodStart, periodEnd, user.getUsername());
         model.addAttribute("moisList", moisList.getMoisMainList());
         model.addAttribute("pagination",moisList.getPagination());
         model.addAttribute("user",user.getUsername());
@@ -95,7 +95,25 @@ public class SearchController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @GetMapping("/topWord")
+    public ResponseEntity<List<String>> topWord() throws IOException {
+        List<String> topWord = searchService.topWord();
+        if (topWord != null) {
+            return ResponseEntity.ok(topWord);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/autoRecommend")
+    public ResponseEntity<List<String>> autoRecommend(@RequestParam String keyword) throws IOException {
+        List<String> autoRecommendList = searchService.autoRecommendWord(keyword);
+        log.debug("auto:{}",autoRecommendList );
+        if (autoRecommendList != null) {
+            return ResponseEntity.ok(autoRecommendList);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 
@@ -105,7 +123,7 @@ public class SearchController {
                                   @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder,
                                   @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd) throws IOException {
         String domain1 = "mois_photo";
-        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page, sortOrder ,periodStart, periodEnd);
+        MoisPagination moisList = searchService.moisPageList(keyword, searchCategory, domain1, page, sortOrder ,periodStart, periodEnd, user.getUsername());
         model.addAttribute("moisList", moisList.getMoisMainList());
         model.addAttribute("pagination",moisList.getPagination());
         model.addAttribute("user",user.getUsername());

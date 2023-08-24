@@ -226,8 +226,12 @@
 
     </div>
   <div style="margin-top: 30px; margin-right:20px;">
+    <p>인기검색어</p>
+    <div id="autoRecommend"></div>
     <p>수동추천단어</p>
     <div id="recommend"></div>
+    <p>자동추천단어</p>
+    <div id="auto"></div>
     <div id="searchResults" style="display: none;"></div>
   </div>
     </div>
@@ -244,7 +248,6 @@
 
         const queryParams = new URLSearchParams({
           keyword: document.getElementById("keyword").value,
-          reSearch: document.getElementById("reSearch").checked,
           searchCategory: getSelectedCategories().join(",")
         });
 
@@ -354,7 +357,7 @@
     if (checkReSearch) {
       const preKeyword = currentUrl.searchParams.get("preKeyword");
 
-      if (preKeyword) {
+      if (preKeyword !== null) {
         keyword = preKeyword + "," + keyword;
         console.log("jear", keyword);
         currentUrl.searchParams.set("preKeyword", keyword);
@@ -460,6 +463,75 @@
     if (keyword.trim() === '') {
       return;
     }
+    function topWord() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/topWord", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var autoRecommendList = JSON.parse(xhr.responseText);
+            topwords(autoRecommendList);
+          } else {
+            console.error("자동 추천을 불러오는 데 실패했습니다.");
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    function topwords(autoRecommendList) {
+      var autoRecommendElement = document.getElementById("autoRecommend");
+      autoRecommendElement.innerHTML = ""; // 기존 내용 초기화
+
+      var ul = document.createElement("ul");
+      ul.setAttribute("id", "topWordList");
+
+      for (var i = 0; i < autoRecommendList.length; i++) {
+        var listItem = document.createElement("li");
+        listItem.textContent = autoRecommendList[i];
+        ul.appendChild(listItem);
+      }
+
+      autoRecommendElement.appendChild(ul);
+    }
+
+    topWord();
+////////////////////////////////////
+
+    function fetchAutoRecommendations() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/autoRecommend", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var autoRecommendList = JSON.parse(xhr.responseText);
+            displayAutoRecommendations(autoRecommendList);
+          } else {
+            console.error("자동 추천을 불러오는 데 실패했습니다.");
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    function displayAutoRecommendations(autoRecommendList) {
+      var autoRecommendElement = document.getElementById("auto");
+      autoRecommendElement.innerHTML = ""; // 기존 내용 초기화
+
+      var ul = document.createElement("ul");
+      ul.setAttribute("id", "autoList");
+
+      for (var i = 0; i < autoRecommendList.length; i++) {
+        var listItem = document.createElement("li");
+        listItem.textContent = autoRecommendList[i];
+        ul.appendChild(listItem);
+      }
+
+      autoRecommendElement.appendChild(ul);
+    }
+
+    fetchAutoRecommendations();
+
 
     $.ajax({
       url: '/forbiddenWord',

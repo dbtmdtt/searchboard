@@ -7,13 +7,23 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import org.elasticsearch.search.sort.SortBuilders;
@@ -26,14 +36,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.text.Normalizer;
-import java.text.Normalizer.Form;
 
 @Service
 @Slf4j
@@ -45,15 +54,14 @@ public class SearchService {
         this.client = client;
     }
 
-    public SearchMainDto mainList(String keyword, List<String> searchCategory, String sort, String startPeriod, String endPeriod, String preKeyword) throws IOException {
-        log.debug("preKeyword:{}",preKeyword);
+    public SearchMainDto mainList(String keyword, List<String> searchCategory, String sort, String startPeriod, String endPeriod, String preKeyword, String user) throws IOException {
         String[] moisDomain = {"mois_photo", "mois_attach"};
         String[] yhnCategories = {"정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프", "연예", "스포츠", "오피니언", "사람들"};
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
         SearchRequest searchRequest_yhn = new SearchRequest("yhn_index");
         SearchMainDto resultDto = new SearchMainDto();
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
-
+        saveLog(keyword, sort, searchCategory, preKeyword, user);
         RangeQueryBuilder dateRangeQuery = getRangeQueryBuilder(startPeriod, endPeriod);
         setSizeQuery(sort, mainBuilder, null,5);
         String searchKeyword ="";
@@ -63,7 +71,6 @@ public class SearchService {
             searchKeyword = keyword;
         }
         if (!ObjectUtils.isEmpty(keyword)) {
-            log.debug("keywlrl:{}",searchKeyword);
             resultDto = getSearchResult(searchKeyword, resultDto, moisDomain, yhnCategories, searchCategory, dateRangeQuery, mainBuilder
                     , searchRequest_mois, searchRequest_yhn);
 
@@ -250,36 +257,8 @@ public class SearchService {
     }
 
 
-    ////통합검색 메인 출력
-//    private List<MoisDto> getMoisMainList(SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder, String[] moisDomain) throws IOException {
-//        List<MoisDto> moisMainList = new ArrayList<>();
-//        log.debug("main:{}",mainBuilder);
-//
-//        for (String domain : moisDomain) {
-//            mainBuilder.query(QueryBuilders.matchQuery("domain", domain));
-//            SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
-//
-//            log.debug("filecontet:{}", searchRequest_mois);
-//            moisMainList.addAll(moisList(moisResponse.getHits().getHits()));
-//        }
-//
-//        log.debug("filecontsssssset:{}", searchRequest_mois);
-//
-//        return moisMainList;
-//    }
-//    private List<YhnDto> getYhnMainList(SearchRequest searchRequest_yhn, SearchSourceBuilder mainBuilder, String[] yhnCategories) throws IOException {
-//        List<YhnDto> yhnMainList = new ArrayList<>();
-//
-//        for (String category : yhnCategories) {
-//            mainBuilder.query(QueryBuilders.matchQuery("category_one_depth", category));
-//            SearchResponse yhnResponse = client.search(searchRequest_yhn.source(mainBuilder), RequestOptions.DEFAULT);
-//            yhnMainList.addAll(yhnList(yhnResponse.getHits().getHits()));
-//        }
-//
-//        return yhnMainList;
-//    }
     // 각각 카테고리 리스트
-    public MoisPagination moisPageList(String keyword, List<String> searchFields, String domain, int page, String sort, String startPeriod, String endPeriod) throws IOException {
+    public MoisPagination moisPageList(String keyword, List<String> searchFields, String domain, int page, String sort, String startPeriod, String endPeriod, String user) throws IOException {
         List<MoisDto> moisMain = new ArrayList<>();
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
         SearchRequest searchRequest_mois = new SearchRequest("mois_index");
@@ -305,6 +284,7 @@ public class SearchService {
         log.debug("match:{}", mainBuilder);
         SearchResponse moisResponse = client.search(searchRequest_mois.source(mainBuilder), RequestOptions.DEFAULT);
         long totalHits = moisResponse.getHits().getTotalHits().value;
+
 
         moisMain.addAll(moisSearchList(moisResponse.getHits().getHits(), keyword));
         MoisPagination moisPagination = new MoisPagination(moisMain, pagination, keyword);
@@ -344,72 +324,6 @@ public class SearchService {
         YhnPagination yhnPagination = new YhnPagination(yhnMain, pagination, keyword);
         return yhnPagination;
     }
-    //검색 결과 메인
-//    public List<MoisDto> searchKeywordMois(String keyword, String[] moisDomain, List<String> searchFields,SearchRequest searchRequest_mois, SearchSourceBuilder mainBuilder  ) throws IOException {
-//        List<MoisDto> moisMain = new ArrayList<>();
-//
-//        for (String domain : moisDomain) {
-//            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-//
-//            if (searchFields.contains("all")) {
-//                // Create a multi-match query for the given keyword and all specified fields
-//                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, "title", "content", "_file.content", "_file.nameOrg");
-//                boolQuery.must(multiMatchQuery);
-//            } else {
-//                // Create a multi-match query for the given keyword and specific fields
-//                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, searchFields.toArray(new String[searchFields.size()]));
-//                boolQuery.must(multiMatchQuery);
-//            }
-//
-//            // Create a filter for the given domain
-//            TermQueryBuilder termQuery = QueryBuilders.termQuery("domain", domain);
-//            boolQuery.filter(termQuery);
-//
-//            mainBuilder.query(boolQuery);
-//
-//
-//            searchRequest_mois.source(mainBuilder);
-//
-//            SearchHit[] hits = client.search(searchRequest_mois, RequestOptions.DEFAULT).getHits().getHits();
-//
-//            moisMain.addAll(moisSearchList(hits,keyword));
-//        }
-//
-//        return moisMain;
-//    }
-//    public List<YhnDto> searchKeywordYhn(String keyword, String[] categories, List<String> searchFields, SearchRequest searchRequest_yhn, SearchSourceBuilder mainBuilder) throws IOException {
-//        List<YhnDto> YhnMain = new ArrayList<>();
-//
-//        for (String category : categories) {
-//            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-//
-//            // Create a multi-match query for the given keyword and all searchFields
-//            if (searchFields.contains("all")) {
-//                // Create a multi-match query for the given keyword and all specified fields
-//                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, "title", "content", "_file.content", "_file.nameOrg");
-//                boolQuery.must(multiMatchQuery);
-//            } else {
-//                /* Create a multi-match query for the given keyword and specific fields */
-//                MultiMatchQueryBuilder multiMatchQuery = QueryBuilders.multiMatchQuery(keyword, searchFields.toArray(new String[searchFields.size()]));
-//                boolQuery.must(multiMatchQuery);
-//            }
-//
-//            // Create a filter for the given domain
-//            TermQueryBuilder termQuery = QueryBuilders.termQuery("category_one_depth", category);
-//            boolQuery.filter(termQuery);
-//
-//            mainBuilder.query(boolQuery);
-//            mainBuilder.trackTotalHits(true);
-//
-//
-//            searchRequest_yhn.source(mainBuilder);
-//
-//            SearchHit[] hits = client.search(searchRequest_yhn, RequestOptions.DEFAULT).getHits().getHits();
-//            YhnMain.addAll(yhnSearchList(hits,keyword));
-//        }
-//
-//        return YhnMain;
-//    }
 
     private static void setKeywordquery(String keyword, List<String> searchFields, BoolQueryBuilder boolQuery) {
         if (keyword != null && !keyword.isEmpty()) {
@@ -694,9 +608,164 @@ public class SearchService {
 
     }
 
-    public void saveLog(String keyword, String sort, List<String> categories,String preKeyword ){
+    public void saveLog(String keyword, String sort, List<String> categories,String preKeyword, String user ) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String createdDate = now.format(formatter);
+        boolean re = false;
+        if(preKeyword != null){
+            re = true;
+        }
+        String domain = "0번사전";
+        String ip = "127.0.0.1";
+        // IP 주소 취득
+        try {
+            // 현재 호스트의 InetAddress 객체 얻기
+            InetAddress localHost = InetAddress.getLocalHost();
+
+            // IP 주소 얻기
+            ip = localHost.getHostAddress();
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        try {
+//            XContentBuilder builder = XContentFactory.jsonBuilder()
+//                    .startObject()
+//                    .field("asc", true)
+//                    .field("category", categories)
+//                    .field("createdDate", createdDate)
+//                    .field("domain", domain)
+//                    .field("ip", ip)
+//                    .field("query",keyword)
+//                    .field("re", preKeyword)
+//                    .field("referer", "none")
+//                    .field("sort", sort)
+//                    .field("user", user)
+//                    .endObject();
+
+            Map<String,Object> tempMap = new HashMap<>();
+            tempMap.put("asc", true);
+            tempMap.put("category", categories);
+            tempMap.put("createdDate", createdDate);
+            tempMap.put("domain", domain);
+            tempMap.put("ip", ip);
+            tempMap.put("oquery", preKeyword); // 전 검색어
+            tempMap.put("query",keyword); // 현 검색어
+            tempMap.put("re", re);
+            tempMap.put("referer", "none"); // 전 url
+            tempMap.put("sort", sort);
+            tempMap.put("user", user);
+            System.out.println("tempMap = " + tempMap);
+            // IndexRequest 객체 생성 및 JSON 문서 추가
+            IndexRequest indexRequest = new IndexRequest("search-log") // 인덱스 이름
+                    .source(tempMap);
+
+            // IndexRequest를 Elasticsearch에 전송하여 데이터를 인덱스에 추가
+            IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+            log.debug("indexResponse");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
+    public List<String> topWord() throws IOException {
+
+        SearchRequest searchRequest = new SearchRequest("search-log");
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+
+
+
+
+        RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("createdDate")
+                .gte("now-7d/d");
+
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery("query");
+
+        boolQuery.filter(rangeQuery);
+        boolQuery.filter(existsQuery);
+
+        sourceBuilder.query(boolQuery);
+
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("top_queries")
+                .field("query")
+                .size(10);
+
+
+        sourceBuilder.aggregation(termsAggregation);
+
+        sourceBuilder.size(0);
+
+        searchRequest.source(sourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        List<String> keyList = new ArrayList<>();
+        Terms topQueries = searchResponse.getAggregations().get("top_queries");
+        for (Terms.Bucket bucket : topQueries.getBuckets()) {
+            String key = bucket.getKeyAsString();
+            long docCount = bucket.getDocCount();
+            keyList.add(key + " (" + docCount + ")");
+        }
+        System.out.println("keyList = " + keyList);
+
+        return keyList;
+    }
+    public List<String> autoRecommendWord(String keyword){
+        // BoolQuery 안에 들어갈 TermQuery와 ExistsQuery 생성
+        TermQueryBuilder termQuery = QueryBuilders.termQuery("query", keyword);
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery("oquery");
+
+        // BoolQuery를 생성하고 must 조건을 추가
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(termQuery).must(existsQuery);
+
+        // Source 필드 설정
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(boolQuery);
+        sourceBuilder.fetchSource(new String[]{"query", "oquery"}, null);
+
+        // SearchRequest 설정
+        SearchRequest searchRequest = new SearchRequest("search-log");
+        searchRequest.source(sourceBuilder);
+
+        try {
+            // 검색 요청 전송
+            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+            Set<String> autoRecommend = new HashSet<>();
+            SearchHits hits = searchResponse.getHits();
+            for (SearchHit hit : hits) {
+                String oquery = (String) hit.getSourceAsMap().get("oquery");
+                if (oquery != null && !oquery.isEmpty()) {
+                    autoRecommend.add(oquery);
+                }
+            }
+
+            // Set을 List로 변환
+            List<String> autoRecommendList = new ArrayList<>(autoRecommend);
+            Set<String> uniqueItems = new HashSet<>();
+            System.out.println(autoRecommendList);
+            for (String item : autoRecommendList) {
+                String[] splitItems = item.replaceAll("\\s", "").split(",");
+                for (String splitItem : splitItems) {
+                    uniqueItems.add(splitItem);
+                }
+            }
+            System.out.println("uniqueItems = " + uniqueItems);
+            // 결과 출력
+            List<String> result = new ArrayList<>(uniqueItems);
+
+            return result;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
 
 }
