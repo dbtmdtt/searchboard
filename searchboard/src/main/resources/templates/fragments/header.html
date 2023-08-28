@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<header th:fragment="headerFragment(tab)">
+    <div style="margin-top: 10px; margin-left:10px">
+        <p> user님 반갑습니다.</p>
+    </div>
+    <div style="margin-bottom: 20px; margin-top: 10px">
+        <form id="searchForm" onsubmit="search(event);"
+              style="display: flex; align-items: center; justify-content: center; flex-direction: column"
+              method="get">
+            <div>
+                <button id="recoverBtn" type="button" onclick ="goToRecovery()">처음으로</button>
+                <input type="text" style="width:300px" name="keyword"  autocomplete='off' id="keyword"/>
+                <button th:src="@{/img/search.png}"  id="searchBtn" type="submit" style="margin-left:10px; width:20px;height :20px" >
+                </button>
+                <input type="checkbox" name="reSearch" value="reSearch"  style="margin-right: 5px;" id="reSearch">결과 내
+                재검색
+            </div>
+            <div id="autocompleteResults" style="width: 300px; border: 1px solid #ccc; background-color: white; display: none;"></div>
+            <div style="display: flex; margin-top:20px">
+                <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked
+                       id="selectAll">전체검색
+                &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="title" style="margin-right: 5px;">제목 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="content" style="margin-right: 5px;">내용 &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="fileName" style="margin-right: 5px;">첨부파일명
+                &nbsp&nbsp
+                <input type="checkbox" name="searchCategory" value="fileContent" style="margin-right: 5px;">첨부파일내용
+                &nbsp&nbsp
+            </div>
+        </form>
+    </div>
+    <nav>
+        <div style="margin : 0 auto;" class="wrapper">
+            <ul class="lnb">
+                <li class="nav-item" th:classappend="${tab}=='integration'? 'select'">
+                    <a id="integration" href="#">통합검색</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='mois_attach'? 'select'">
+                    <a id="mois_attach" href="#">보도자료</a>
+                    <span class="separator"></span>
+                </li>
+
+                <li class="nav-item" th:classappend="${tab}=='mois_photo'? 'select'">
+                    <a  id="mois_photo" href="#">사진자료</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='정치'? 'select'">
+                    <a id = "정치" href="#" >정치</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='전체기사'? 'select'">
+                    <a id = "전체기사" href="#" >북한</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='경제'? 'select'">
+                    <a id = "경제" href="#" >경제</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='산업'? 'select'">
+                    <a id = "산업" href="#" >산업</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='사회'? 'select'">
+                    <a id = "사회" href="#" >사회</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='전국'? 'select'">
+                    <a id = "전국" href="#" >전국</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='세계'? 'select'">
+                    <a id = "세계" href="#" >세계</a>
+                    <span class="separator" ></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='문화'? 'select'">
+                    <a id = "문화" href="#" >문화</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='라이프'? 'select'">
+                    <a id = "라이프" href="#" >라이프</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='연예'? 'select'">
+                    <a id = "연예" href="#" >연예</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='스포츠'? 'select'">
+                    <a id = "스포츠" href="#" >스포츠</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='오피니언'? 'select'">
+                    <a id = "오피니언" href="#" >오피니언</a>
+                    <span class="separator"></span>
+                </li>
+                <li class="nav-item" th:classappend="${tab}=='사람들'? 'select'">
+                    <a id = "사람들" href="#" >사람들</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+</html>

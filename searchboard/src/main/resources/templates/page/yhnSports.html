@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/search}">
+<head>
+    <title>통합검색</title>
+</head>
+
+<body layout:insert="~{layout/search :: config(tab='스포츠')}">
+<div layout:fragment="content">
+
+<div style="display:flex;">
+    <div style="margin: 30px auto; width:60%;">
+        <div>
+            <button id="sortByDate" value="dateDesc" onclick="sort1(value)">날짜정렬</button>
+            <button id="sortByScore" value="accuracyDesc" onclick="sort2(value)">정확도정렬</button>
+            <button onclick="showRadioButton()">조회기간</button>
+            <div id="radioDiv" style="display:none;">
+                <input type="radio" name="chk_info" value="0" >전체
+                <input type="radio" name="chk_info" value="1">1일
+                <input type="radio" name="chk_info" value="7">일주일
+                <input type="radio" name="chk_info" value="30">한달
+                <input type="radio" name="chk_info" value="365">1년
+                <input type="radio" name="chk_info" id="directInput">직접입력
+                <button onclick="searchPeriod()">적용</button>
+            </div>
+            <div id="date" style="display : none;">
+                <input type="date" id="startDate">
+                <input type="date" id="endDate">
+            </div>
+        </div>
+
+        <h4>
+            <span>스포츠</span>
+
+        </h4>
+        <th:block th:if="${moisMain.isEmpty()}">
+            <li>
+                <p>검색 결과가 없습니다.</p>
+            </li>
+        </th:block>
+        <ul style="list-style-type: none;">
+            <li th:each="yhn : ${yhnMain}" >
+                <div style="display: flex; align-items: center; margin-top: 20px;">
+                    <img th:src="${yhn.thumbnailImg}"
+                         style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
+                    <div style="width: 85%">
+                        <a th:href="${yhn.url}">
+                            <h5 th:utext="${yhn.title}"></h5>
+                        </a>
+                        <p th:utext="${yhn.content}"
+                           style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+                        <div style="display:flex">
+                            <small th:utext="${yhn.writer}"></small>
+                            <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <nav aria-label="Page navigation example" class="row flex justify-content-center" >
+            <ul class="pagination">
+                <li class="page-item" th:if="${pagination.page != 1}" >
+                    <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
+                        <span aria-hidden="true">처음</span>
+                    </a>
+                </li>
+                <li class="page-item"  th:if="${pagination.startPage!= 1}">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
+                        <span aria-hidden="true">이전</span>
+                    </a>
+                </li>
+                <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
+                    <th:block>
+                        <ul class="pagination">
+                            <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
+                                <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
+                                   th:text="${pageButton}"
+                                   th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
+                            </li>
+                        </ul>
+                    </th:block>
+                </li>
+                <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
+                        <span aria-hidden="true">다음</span>
+                    </a>
+                </li>
+                <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
+                    <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
+                        <span aria-hidden="true">끝</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+    <div style="margin-top: 30px; margin-right:20px;">
+        <p>인기검색어</p>
+        <div id="topWord"></div>
+        <p>수동추천단어</p>
+        <div id="recommend"></div>
+        <p>자동추천단어</p>
+        <div id="autoRecommend"></div>
+        <div id="searchResults" style="display: none;"></div>
+    </div>
+
+</div>
+</div>
+
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=2, user-scalable=yes" />
+    <link rel="stylesheet" href="../../static/css/search.css" th:href="@{/css/style.css}" media="all" />
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+</head>
+<body>
+<div class="wrap" layout:fragment="config(tab)">
+    <!-- header str -->
+    <header th:replace="fragments/header :: headerFragment(${tab})"></header>
+    <!-- header end -->
+    <!-- container str -->
+    <div class="container wrapper">
+        <!-- contents str -->
+
+        <div class="contents" layout:fragment="content"></div>
+
+        <!-- contents end -->
+    </div>
+    <!-- container end -->
+    <!-- footer -->
+<!--    <footer th:replace="fragments/footer :: footerFragment"></footer>-->
+</div>
+
+</body>
+<script src="../../static/js/common.js" th:src="@{/js/common.js}"></script>
+</html>

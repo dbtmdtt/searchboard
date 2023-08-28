@@ -11,18 +11,15 @@ public class SearchMainDto {
     private List<YhnDto> yhnMainList;
     private List<MoisDto> moisMainList;
     private Pagination pagination;
+    public SearchMainDto(){
+        
+    }
+    public SearchMainDto(List<MoisDto> moisMainList, List<YhnDto> yhnMainList, Pagination pagination){
+        this.moisMainList = moisMainList;
+        this.yhnMainList = yhnMainList;
+        this.pagination = pagination;
 
-
-
-
-    private List<String> forbiddenWord;
-    private String keyword;
-    private String preKeyword;
-    private boolean reSearch;
-    private String sortOrder;
-    private List<String> searchCategory;
-    private String domain;
-    private String yhnCategory;
+    }
 
 
 
