@@ -78,7 +78,7 @@ public class SearchService {
         }else{
             searchKeyword = keyword;
         }
-
+        log.debug("response:{}", mainBuilder);
         if (!ObjectUtils.isEmpty(keyword)) {
             resultDto = getSearchResult(searchKeyword, resultDto, moisDomain, yhnCategories, searchCategory, dateRangeQuery, mainBuilder
                     , searchRequest_mois, searchRequest_yhn);
@@ -137,6 +137,7 @@ public class SearchService {
                 for (SearchResponse yhnResponse : yhnMain) {
                     yhnMainList.addAll(yhnList(yhnResponse.getHits().getHits()));
                 }
+
 
                 resultDto.setYhnMainList(yhnMainList);
                 resultDto.setMoisMainList(moisMainList);
@@ -261,7 +262,7 @@ public class SearchService {
                     resultDto.setYhnMainList(YhnMain);
                 }
             }
-
+            log.debug("response:{}", mainBuilder);
         }
         return resultDto;
     }
@@ -480,7 +481,7 @@ public class SearchService {
         highlightBuilder.field("_file.content").highlighterType("plain");
         highlightBuilder.field("_file.nameOrg").highlighterType("plain");
         highlightBuilder.fragmentSize(100);
-//        highlightBuilder.requireFieldMatch(false); //
+
         return highlightBuilder;
     }
     private List<MoisDto> moisList(SearchHit[] hits) {

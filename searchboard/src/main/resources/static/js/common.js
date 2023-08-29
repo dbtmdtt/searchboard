@@ -405,6 +405,38 @@ function search(event) {
     });
     console.log("url", currentUrl);
     window.location.href = currentUrl;
+
+
 }
+document.getElementById("submitBtn").addEventListener("click", function () {
+    // Get input values
+    var phraseSearchValue = document.getElementById("phraseSearch").value;
+    var wordSearchValue = document.getElementById("wordSearch").value;
+    var notFoundWordValue = document.getElementById("notFoundWord").value;
+    // Split input values into arrays
+    var phraseSearchArray = phraseSearchValue.split(",");
+    var wordSearchArray = wordSearchValue.split(",");
+    var notFoundWordArray = notFoundWordValue.split(",");
+
+    // Create SearchParseDto object
+    var searchParseDto = {
+        matchPhrase: phraseSearchArray,
+        mustNot: notFoundWordArray,
+        must: wordSearchArray
+    };
+    fetch('/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(searchParseDto),
+    }).then(response => {
+
+    }).catch(error => {
+        // 에러 처리
+    });
+
+    console.log(searchParseDto);
+});
 
 
