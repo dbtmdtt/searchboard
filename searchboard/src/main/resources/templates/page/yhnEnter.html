@@ -28,71 +28,77 @@
                     <input type="date" id="endDate">
                 </div>
             </div>
+            <ul>
+                <h4>
+                    <span>연예</span>
 
-            <h4>
-                <span>연예</span>
-
-            </h4>
-            <th:block th:if="${moisMain.isEmpty()}">
-                <li>
-                    <p>검색 결과가 없습니다.</p>
-                </li>
-            </th:block>
-            <ul style="list-style-type: none;">
-                <li th:each="yhn : ${yhnMain}">
-                    <div style="display: flex; align-items: center; margin-top: 20px;">
-                        <img th:src="${yhn.thumbnailImg}"
-                             style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
-                        <div style="width: 85%">
-                            <a th:href="${yhn.url}">
-                                <h5 th:utext="${yhn.title}"></h5>
-                            </a>
-                            <p th:utext="${yhn.content}"
-                               style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
-                            <div style="display:flex">
-                                <small th:utext="${yhn.writer}"></small>
-                                <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
+                </h4>
+                <th:block th:if="${yhnMain.isEmpty()}">
+                    <li>
+                        <p>검색 결과가 없습니다.</p>
+                    </li>
+                </th:block>
+                <ul style="list-style-type: none;">
+                    <li th:each="yhn : ${yhnMain}">
+                        <div style="display: flex; align-items: center; margin-top: 20px;">
+                            <img th:src="${yhn.thumbnailImg}"
+                                 style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
+                            <div style="width: 85%">
+                                <a th:href="${yhn.url}">
+                                    <h5 th:utext="${yhn.title}"></h5>
+                                </a>
+                                <p th:utext="${yhn.content}"
+                                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+                                <div style="display:flex">
+                                    <small th:utext="${yhn.writer}"></small>
+                                    <small th:utext="${yhn.writeDate}" style="margin-left: 10px"></small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-            </ul>
-
-            <nav aria-label="Page navigation example" class="row flex justify-content-center" >
-                <ul class="pagination">
-                    <li class="page-item" th:if="${pagination.page != 1}" >
-                        <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
-                            <span aria-hidden="true">처음</span>
-                        </a>
-                    </li>
-                    <li class="page-item"  th:if="${pagination.startPage!= 1}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
-                            <span aria-hidden="true">이전</span>
-                        </a>
-                    </li>
-                    <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
-                        <th:block>
-                            <ul class="pagination">
-                                <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
-                                    <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
-                                       th:text="${pageButton}"
-                                       th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
-                                </li>
-                            </ul>
-                        </th:block>
-                    </li>
-                    <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
-                            <span aria-hidden="true">다음</span>
-                        </a>
-                    </li>
-                    <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
-                            <span aria-hidden="true">끝</span>
-                        </a>
                     </li>
                 </ul>
-            </nav>
+            </ul>
+            <th:block th:unless="${yhnMain.isEmpty()}">
+                <nav aria-label="Page navigation example" class="row flex justify-content-center">
+                    <ul class="pagination">
+                        <li class="page-item" th:if="${pagination.page != 1}">
+                            <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)" aria-label="Previous">
+                                <span aria-hidden="true">처음</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:if="${pagination.startPage!= 1}">
+                            <a class="page-link" href="javascript:void(0);"
+                               th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
+                                <span aria-hidden="true">이전</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
+                            <th:block>
+                                <ul class="pagination">
+                                    <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item">
+                                        <a class="page-link" href="javascript:void(0);"
+                                           th:onclick="'goToPage(' + ${pageButton} + ')'"
+                                           th:text="${pageButton}"
+                                           th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
+                                    </li>
+                                </ul>
+                            </th:block>
+                        </li>
+                        <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
+                            <a class="page-link" href="javascript:void(0);"
+                               th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
+                                <span aria-hidden="true">다음</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
+                            <a class="page-link" href="javascript:void(0);"
+                               th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
+                                <span aria-hidden="true">끝</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </th:block>
         </div>
         <div style="margin-top: 30px; margin-right:20px;">
             <p>인기검색어</p>
@@ -103,10 +109,10 @@
             <div id="autoRecommend"></div>
             <div id="searchResults" style="display: none;"></div>
         </div>
-
     </div>
-
 </div>
+
+
 </body>
 </html>
 

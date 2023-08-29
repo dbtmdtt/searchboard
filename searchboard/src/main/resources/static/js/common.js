@@ -424,19 +424,22 @@ document.getElementById("submitBtn").addEventListener("click", function () {
         mustNot: notFoundWordArray,
         must: wordSearchArray
     };
+    localStorage.setItem('searchParseDto', JSON.stringify(searchParseDto));
     fetch('/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(searchParseDto),
-    }).then(response => {
 
+        body: JSON.stringify(searchParseDto),
+
+    }).then(response => {
+        console.log("asdf",searchParseDto);
     }).catch(error => {
-        // 에러 처리
+        console.log("실패",searchParseDto);
     });
 
-    console.log(searchParseDto);
+    console.log("ㅇㅇㅇㅇ",searchParseDto);
 });
 
 

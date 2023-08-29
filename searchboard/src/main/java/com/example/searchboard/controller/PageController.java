@@ -10,10 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -36,8 +33,7 @@ public class PageController {
     public String index(Model model, @RequestParam(required = false) String keyword, @RequestParam (defaultValue = "integration") String category,
                         @RequestParam(required = false) List<String> searchCategory, @RequestParam(defaultValue = "1") int page,
                         @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder,
-                        @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd, @RequestParam(required = false) String reKeyword,
-                        @ModelAttribute SearchParseDto searchParseDto) throws IOException {
+                        @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd, @RequestParam(required = false) String reKeyword) throws IOException {
         SearchMainDto mainList;
 
         if (category.equals("integration") || category.isEmpty()) {
@@ -53,9 +49,9 @@ public class PageController {
         model.addAttribute("moisMain", mainList.getMoisMainList());
         model.addAttribute("yhnMain", mainList.getYhnMainList());
         model.addAttribute("pagination", mainList.getPagination());
-        model.addAttribute("searchParse", searchParseDto);
+//        model.addAttribute("searchParse", searchParseDto);
         model.addAttribute("user", user.getUsername());
-        log.debug("parse:{}", searchParseDto);
+
         switch (category) {
             case "integration":
                 return "page/searchMain";
@@ -93,6 +89,7 @@ public class PageController {
                 return "page/searchMain";
         }
     }
+
 //    @GetMapping("/")
 //    public String index(Model model, @ModelAttribute SearchDto searchRequestDto, @AuthenticationPrincipal User user) throws IOException {
 //        String keyword = searchRequestDto.getKeyword();
