@@ -392,7 +392,7 @@ function search(event) {
         }
     } else {
         const preKeyword = currentUrl.searchParams.get("reKeyword");
-        currentUrl.searchParams.set("keyword", keyword)
+        currentUrl.searchParams.set("keyword", keyword);
         if (preKeyword !== null) {
             currentUrl.searchParams.delete("reKeyword");
         }
@@ -404,11 +404,13 @@ function search(event) {
         currentUrl.searchParams.append("searchCategory", category);
     });
     console.log("url", currentUrl);
+
     window.location.href = currentUrl;
 
 
+
 }
-document.getElementById("submitBtn").addEventListener("click", function () {
+function matchQuery(){
     // Get input values
     var phraseSearchValue = document.getElementById("phraseSearch").value;
     var wordSearchValue = document.getElementById("wordSearch").value;
@@ -417,29 +419,18 @@ document.getElementById("submitBtn").addEventListener("click", function () {
     var phraseSearchArray = phraseSearchValue.split(",");
     var wordSearchArray = wordSearchValue.split(",");
     var notFoundWordArray = notFoundWordValue.split(",");
+    var currentUrl = new URLSearchParams(window.location.search);
 
-    // Create SearchParseDto object
-    var searchParseDto = {
-        matchPhrase: phraseSearchArray,
-        mustNot: notFoundWordArray,
-        must: wordSearchArray
-    };
-    localStorage.setItem('searchParseDto', JSON.stringify(searchParseDto));
-    fetch('/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    // Set query parameters based on arrays
+    currentUrl.set("match_phrase", phraseSearchArray.join(","));
+    currentUrl.set("must", wordSearchArray.join(","));
+    currentUrl.set("must_not", notFoundWordArray.join(","));
 
-        body: JSON.stringify(searchParseDto),
+    // Update the URL with the new query parameters
+    window.location.href = "?" + currentUrl.toString();
 
-    }).then(response => {
-        console.log("asdf",searchParseDto);
-    }).catch(error => {
-        console.log("실패",searchParseDto);
-    });
 
-    console.log("ㅇㅇㅇㅇ",searchParseDto);
-});
+}
+
 
 

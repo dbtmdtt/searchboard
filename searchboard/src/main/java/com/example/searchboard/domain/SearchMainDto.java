@@ -10,14 +10,16 @@ import java.util.Map;
 public class SearchMainDto {
     private List<ListDto> yhnMainList;
     private List<ListDto> moisMainList;
+    private List<ListDto> mainList;
     private Pagination pagination;
     public SearchMainDto(){
         
     }
-    public SearchMainDto(List<ListDto> moisMainList, List<ListDto> yhnMainList, Pagination pagination){
+    public SearchMainDto(List<ListDto> moisMainList, List<ListDto> yhnMainList, Pagination pagination,  List<ListDto> mainList){
         this.moisMainList = moisMainList;
         this.yhnMainList = yhnMainList;
         this.pagination = pagination;
+        this.mainList = mainList;
 
     }
 

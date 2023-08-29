@@ -22,7 +22,7 @@
                 <label>문장 일치<input id="phraseSearch" type="text" style="margin-top: 5px;" autocomplete='off'/></label>
                 <label>단어 포함<input id="wordSearch" type="text" style="margin-top: 5px;" autocomplete='off'/></label>
                 <label>단어 제외<input id="notFoundWord" type="text" style="margin-top: 5px;" autocomplete='off'/></label>
-                <button type="button" id="submitBtn">검색</button>
+                <button type="button" id="submitBtn" onclick="matchQuery()">검색</button>
             </div>
             <div style="display: flex; margin-top:20px">
                 <input type="checkbox" name="searchCategory" value="all" style="margin-right: 5px;" checked
@@ -35,6 +35,7 @@
                 <input type="checkbox" name="searchCategory" value="fileContent" style="margin-right: 5px;">첨부파일내용
                 &nbsp&nbsp
             </div>
+
         </form>
 
     </div>

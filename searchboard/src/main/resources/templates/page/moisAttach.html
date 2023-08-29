@@ -30,13 +30,13 @@
                 <h4>
                     <span>보도자료</span>
                 </h4>
-                <th:block th:if="${moisMain.isEmpty()}">
+                <th:block th:if="${mainList.isEmpty()}">
                     <li>
                         <p>검색 결과가 없습니다.</p>
                     </li>
                 </th:block>
                 <ul style="list-style-type: none;">
-                    <li th:each="mois : ${moisMain}" >
+                    <li th:each="mois : ${mainList}" >
                         <a th:href="${mois.url}">
                             <h5 th:utext="${mois.title}" style="margin-top:20px"></h5>
                         </a>
@@ -57,41 +57,44 @@
                     </li>
                 </ul>
             </ul>
-            <nav aria-label="Page navigation example" class="row flex justify-content-center" >
-                <ul class="pagination">
-                    <li class="page-item" th:if="${pagination.page != 1}" >
-                        <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
-                            <span aria-hidden="true">처음</span>
-                        </a>
-                    </li>
-                    <li class="page-item"  th:if="${pagination.startPage!= 1}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
-                            <span aria-hidden="true">이전</span>
-                        </a>
-                    </li>
-                    <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
-                        <th:block>
-                            <ul class="pagination">
-                                <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
-                                    <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
-                                       th:text="${pageButton}"
-                                       th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
-                                </li>
-                            </ul>
-                        </th:block>
-                    </li>
-                    <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
-                            <span aria-hidden="true">다음</span>
-                        </a>
-                    </li>
-                    <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
-                        <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
-                            <span aria-hidden="true">끝</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+            <th:block th:unless="${mainList.isEmpty()}">
+                <nav aria-label="Page navigation example" class="row flex justify-content-center" >
+                    <ul class="pagination">
+                        <li class="page-item" th:if="${pagination.page != 1}" >
+                            <a class="page-link" href="javascript:void(0);" onclick="goToPage(1)"  aria-label="Previous" >
+                                <span aria-hidden="true">처음</span>
+                            </a>
+                        </li>
+                        <li class="page-item"  th:if="${pagination.startPage!= 1}">
+                            <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.prevBlock} + ')'" aria-label="Previous">
+                                <span aria-hidden="true">이전</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:with="start=${pagination.startPage}, end=${pagination.endPage}">
+                            <th:block>
+                                <ul class="pagination">
+                                    <li th:each="pageButton : ${#numbers.sequence(start, end)}" class="page-item" >
+                                        <a class="page-link"  href="javascript:void(0);" th:onclick="'goToPage(' + ${pageButton} + ')'"
+                                           th:text="${pageButton}"
+                                           th:style="${pageButton == pagination.page ? 'background-color:#0080FF; color:white;' : 'background-color:white; color:#0080FF;'}"></a>
+                                    </li>
+                                </ul>
+                            </th:block>
+                        </li>
+                        <li class="page-item" th:if="${pagination.block != pagination.totalBlockCnt}">
+                            <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.nextBlock} + ')'" aria-label="Next">
+                                <span aria-hidden="true">다음</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:if="${pagination.page != pagination.totalPageCnt}">
+                            <a class="page-link" href="javascript:void(0);" th:onclick="'goToPage(' + ${pagination.totalPageCnt} + ')'" aria-label="Previous">
+                                <span aria-hidden="true">끝</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </th:block>
         </div>
         <div style="margin-top: 30px; margin-right:20px;">
             <p>인기검색어</p>

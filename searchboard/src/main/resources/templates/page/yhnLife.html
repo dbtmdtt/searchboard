@@ -33,13 +33,13 @@
                     <span>라이프</span>
 
                 </h4>
-                <th:block th:if="${yhnMain.isEmpty()}">
+                <th:block th:if="${mainList.isEmpty()}">
                     <li>
                         <p>검색 결과가 없습니다.</p>
                     </li>
                 </th:block>
                 <ul style="list-style-type: none;">
-                    <li th:each="yhn : ${yhnMain}">
+                    <li th:each="yhn : ${mainList}">
                         <div style="display: flex; align-items: center; margin-top: 20px;">
                             <img th:src="${yhn.thumbnailImg}"
                                  style="width: 160px; height:110px; margin-right:20px; background-size: cover;"/>
@@ -58,7 +58,7 @@
                     </li>
                 </ul>
             </ul>
-            <th:block th:unless="${yhnMain.isEmpty()}">
+            <th:block th:unless="${mainList.isEmpty()}">
                 <nav aria-label="Page navigation example" class="row flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item" th:if="${pagination.page != 1}">

@@ -33,14 +33,14 @@
                     <span>사진자료</span>
 
                 </h4>
-                <th:block th:if="${moisMain.isEmpty()}">
+                <th:block th:if="${mainList.isEmpty()}">
                     <li>
                         <p>검색 결과가 없습니다.</p>
                     </li>
                 </th:block>
 
                 <ul style="list-style-type: none;">
-                    <li th:each="mois : ${moisMain}" >
+                    <li th:each="mois : ${mainList}" >
                         <a th:href="${mois.url}">
                             <h5 th:utext="${mois.title}" style="margin-top:20px"></h5>
                         </a>
@@ -55,7 +55,7 @@
                     </li>
                 </ul>
             </ul>
-            <th:block th:unless="${moisMain.isEmpty()}">
+            <th:block th:unless="${mainList.isEmpty()}">
             <nav aria-label="Page navigation example" class="row flex justify-content-center" >
                 <ul class="pagination">
                     <li class="page-item" th:if="${pagination.page != 1}" >

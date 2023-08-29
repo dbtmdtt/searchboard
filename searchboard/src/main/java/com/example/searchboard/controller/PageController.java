@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,22 +34,22 @@ public class PageController {
     @GetMapping("/")
     public String index(Model model, @RequestParam(required = false) String keyword, @RequestParam (defaultValue = "integration") String category,
                         @RequestParam(required = false) List<String> searchCategory, @RequestParam(defaultValue = "1") int page,
-                        @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder,
+                        @AuthenticationPrincipal User user, @RequestParam(defaultValue = "dateDesc") String sortOrder, @RequestParam(required = false)String must,@RequestParam(required = false) String must_not, @RequestParam(required = false) String match_phrase,
                         @RequestParam(required = false) String periodStart, @RequestParam(required = false) String periodEnd, @RequestParam(required = false) String reKeyword) throws IOException {
         SearchMainDto mainList;
 
-        if (category.equals("integration") || category.isEmpty()) {
-            mainList = searchService.mainList(keyword, searchCategory, sortOrder, periodStart, periodEnd, reKeyword, user.getUsername());
-        } else if (category.equals("mois_photo") || category.equals("mois_attach")) {
-            mainList = searchService.moisPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword);
+        if (category.equals("integration")) {
+            mainList = searchService.mainList(keyword, searchCategory, sortOrder, periodStart, periodEnd, reKeyword, user.getUsername(), must, must_not, match_phrase);
         } else {
-            mainList = searchService.yhnPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword);
+            mainList = searchService.totalPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword, must, must_not, match_phrase);
         }
+
 
         model.addAttribute("domains", domains);
         model.addAttribute("categories", categories);
         model.addAttribute("moisMain", mainList.getMoisMainList());
         model.addAttribute("yhnMain", mainList.getYhnMainList());
+        model.addAttribute("mainList", mainList.getMainList());
         model.addAttribute("pagination", mainList.getPagination());
 //        model.addAttribute("searchParse", searchParseDto);
         model.addAttribute("user", user.getUsername());
@@ -91,25 +93,16 @@ public class PageController {
     }
 
 //    @GetMapping("/")
-//    public String index(Model model, @ModelAttribute SearchDto searchRequestDto, @AuthenticationPrincipal User user) throws IOException {
-//        String keyword = searchRequestDto.getKeyword();
-//        String category = searchRequestDto.getCategory();
-//        List<String> searchCategory = searchRequestDto.getSearchCategory();
-//        int page = searchRequestDto.getPage();
-//        String sortOrder = searchRequestDto.getSortOrder();
-//        String periodStart = searchRequestDto.getPeriodStart();
-//        String periodEnd = searchRequestDto.getPeriodEnd();
-//        String reKeyword = searchRequestDto.getReKeyword();
+//    public String index(Model model, @ModelAttribute SearchDto searchDto, @AuthenticationPrincipal User user) throws IOException {
 //        SearchMainDto mainList;
 //
-//        if (category.equals("integration") || category.isEmpty()) {
-//            mainList = searchService.mainList(keyword, searchCategory, sortOrder, periodStart, periodEnd, reKeyword, user.getUsername());
-//        } else if (category.equals("mois_photo") || category.equals("mois_attach")) {
-//            mainList = searchService.moisPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword);
+//        if (searchDto.getCategory().equals("integration")) {
+//            mainList = searchService.mainList(searchDto.getKeyword(), searchDto.getSearchCategory(), searchDto.getSortOrder(), searchDto.getPeriodStart(), searchDto.getPeriodEnd(), searchDto.getReKeyword(), user.getUsername());
 //        } else {
-//            mainList = searchService.yhnPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword);
+//            mainList = searchService.totalPageList(searchDto.getKeyword(), searchDto.getSearchCategory(), searchDto.getCategory(), searchDto.getPage(), searchDto.getSortOrder(), searchDto.getPeriodStart(), searchDto.getPeriodEnd(), searchDto.getReKeyword());
 //        }
-//        log.debug("로그:{}",searchRequestDto.getSearchParseDto());
+////
+//        model.addAttribute("searchDto", searchDto);
 //        model.addAttribute("domains", domains);
 //        model.addAttribute("categories", categories);
 //        model.addAttribute("moisMain", mainList.getMoisMainList());
@@ -117,7 +110,7 @@ public class PageController {
 //        model.addAttribute("pagination", mainList.getPagination());
 //        model.addAttribute("user", user.getUsername());
 //
-//        switch (category) {
+//        switch (searchDto.getCategory()) {
 //            case "integration":
 //                return "page/searchMain";
 //            case "mois_attach":
