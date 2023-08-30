@@ -1,6 +1,6 @@
 package com.example.searchboard.controller;
 
-import com.example.searchboard.domain.SearchDto;
+//import com.example.searchboard.domain.SearchDto;
 import com.example.searchboard.domain.SearchMainDto;
 import com.example.searchboard.domain.SearchParseDto;
 import com.example.searchboard.service.SearchService;
@@ -39,9 +39,9 @@ public class PageController {
         SearchMainDto mainList;
 
         if (category.equals("integration")) {
-            mainList = searchService.mainList(keyword, searchCategory, sortOrder, periodStart, periodEnd, reKeyword, user.getUsername(), must, must_not, match_phrase);
+            mainList = searchService.mainList(keyword, searchCategory, sortOrder, periodStart, periodEnd, reKeyword, user.getUsername(), must, must_not, match_phrase, category);
         } else {
-            mainList = searchService.totalPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword, must, must_not, match_phrase);
+            mainList = searchService.totalPageList(keyword, searchCategory, category, page, sortOrder, periodStart, periodEnd, reKeyword, must, must_not, match_phrase,category);
         }
 
 
