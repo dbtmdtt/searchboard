@@ -425,6 +425,12 @@ function matchQuery(){
     currentUrl.set("match_phrase", phraseSearchArray.join(","));
     currentUrl.set("must", wordSearchArray.join(","));
     currentUrl.set("must_not", notFoundWordArray.join(","));
+    searchCategories.forEach(category => {
+        const checkbox = document.querySelector(`input[name="searchCategory"][value="${category}"]`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
 
     // Update the URL with the new query parameters
     window.location.href = "?" + currentUrl.toString();

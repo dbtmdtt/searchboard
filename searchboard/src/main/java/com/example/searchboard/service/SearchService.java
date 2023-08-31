@@ -65,9 +65,6 @@ public class SearchService {
         String[] yhnCategories = {"정치", "전체기사", "경제", "산업", "사회", "전국", "세계", "문화", "라이프", "연예", "스포츠", "오피니언", "사람들"};
         SearchMainDto resultDto = new SearchMainDto();
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
-        if(StringUtils.hasText(must) || StringUtils.hasText(must_not) || StringUtils.hasText(match_phrase)){
-            parsedSearch(must,must_not,match_phrase, searchField, categoryMenu, startPeriod, endPeriod, sort);
-        }
 
         if (keyword != null) {
             saveLog(keyword, sort, searchField, reKeyword, user);
@@ -94,7 +91,10 @@ public class SearchService {
                 resultDto = getSearchResult(engToKor, resultDto, moisDomain, yhnCategories, searchField, dateRangeQuery, mainBuilder);
             }
             return resultDto;
-        } else {
+        } else if(StringUtils.hasText(must) || StringUtils.hasText(must_not) || StringUtils.hasText(match_phrase)){
+            resultDto = parsedSearch(must,must_not,match_phrase, searchField, categoryMenu, startPeriod, endPeriod, sort);
+            return resultDto;
+        }else {
             try {
 
                 //메인 페이지 전체 기사 불러오기
@@ -156,7 +156,7 @@ public class SearchService {
     }
     private SearchMainDto parsedSearch(String must, String must_not, String match_phrase, List<String> searchField, String categoryMenu,String startPeriod,String endPeriod, String sort) throws IOException{
         SearchMainDto searchMainDto = new SearchMainDto();
-
+        List<ListDto> moisMain = new ArrayList<>();
         RangeQueryBuilder dateRangeQuery = getRangeQueryBuilder(startPeriod, endPeriod);
         if (sort != null) {
             setSortQuery(sort, mainBuilder, null, 5);
@@ -189,28 +189,23 @@ public class SearchService {
             TermQueryBuilder categoryQuery = QueryBuilders.termQuery("domain", categoryMenu);
             boolQuery.filter(categoryQuery);
             hits = client.search(searchRequest_mois.source(new SearchSourceBuilder().query(boolQuery)), RequestOptions.DEFAULT).getHits().getHits();
-            System.out.println("searchRequest_mois = " + searchRequest_mois);
+
         } else {
             TermQueryBuilder categoryQuery = QueryBuilders.termQuery("category_one_depth", categoryMenu);
             boolQuery.filter(categoryQuery);
-            hits = client.search(searchRequest_yhn.source(new SearchSourceBuilder().query(boolQuery)), RequestOptions.DEFAULT).getHits().getHits();
-            System.out.println("searchRequest_yhn = " + searchRequest_yhn);
+            hits = client.search(searchRequest_yhn.source(new SearchSourceBuilder().query(boolQuery)), RequestOptions.DEFAULT).getHits().getHits();;
         }
 
         // 여기서 Elasticsearch에 쿼리를 실행하고 결과를 얻어온 후, SearchMainDto 객체를 채워 반환한다.
         List<ListDto> moisMainList = new ArrayList<>();
         List<ListDto> yhnMainList = new ArrayList<>();
         List<ListDto> mainList = new ArrayList<>();
-        Pagination pagination = new Pagination();  // 예시에서는 Pagination을 생성하는 코드가 없어 가정함
 
-        for (SearchHit hit : hits) {
-            // hit에서 필요한 정보를 추출하여 ListDto로 변환하고 해당 리스트에 추가하는 코드를 작성해야 함
-        }
 
-        searchMainDto.setMoisMainList(moisMainList);
-        searchMainDto.setYhnMainList(yhnMainList);
-        searchMainDto.setMainList(mainList);
-        searchMainDto.setPagination(pagination);
+        moisMain.addAll(totalList(hits));
+        System.out.println("mainList = " + moisMain);
+        searchMainDto.setMainList(moisMain);
+
 
         return searchMainDto;
 
@@ -286,6 +281,7 @@ public class SearchService {
         }
         if(StringUtils.hasText(must) || StringUtils.hasText(must_not) || StringUtils.hasText(match_phrase)){
             parsedSearch(must,must_not,match_phrase, searchFields, domain, startPeriod, endPeriod, sort);
+            return parsedSearch(must,must_not,match_phrase, searchFields, domain, startPeriod, endPeriod, sort);
         }
         List<ListDto> moisMain = new ArrayList<>();
         RangeQueryBuilder dateRangeQuery = getRangeQueryBuilder(startPeriod, endPeriod);
@@ -323,7 +319,6 @@ public class SearchService {
 
     public SearchMainDto moisPage(long total, String keyword, List<String> searchFields, String domain, int page, String sort, String startPeriod, String endPeriod, String must, String must_not, String match_phrase) throws IOException {
         List<ListDto> moisMain = new ArrayList<>();
-        log.debug("asdf2");
         Pagination pagination = new Pagination((int) total, page);
         SearchMainDto resultDto = new SearchMainDto();
         SearchSourceBuilder mainBuilder = new SearchSourceBuilder();
@@ -427,7 +422,6 @@ public class SearchService {
     }
     private static void setNotKeyword(String keyword, List<String> searchFields, BoolQueryBuilder boolQuery) {
         if (keyword != null && !keyword.isEmpty()) {
-
             String[] keywords = keyword.split(",");
             for (String key : keywords) {
                 key = key.trim();
@@ -563,6 +557,7 @@ public class SearchService {
                 keywordList.add(keywordValue);
             }
             keywordList.sort(Comparator.comparingInt(String::length));
+            System.out.println("자동완성 : " + keywordList);
             return keywordList;
         } catch (IOException e) {
             e.printStackTrace();
@@ -583,7 +578,7 @@ public class SearchService {
                 String keyword = (String) hit.getSourceAsMap().get("keyword");
                 forbiddenList.add(keyword);
             }
-
+            System.out.println("금칙어 : " + forbiddenList);
             return forbiddenList;
         } catch (IOException e) {
             e.printStackTrace();
@@ -606,7 +601,7 @@ public class SearchService {
                 String forbiddenWord = (String) hit.getSourceAsMap().get("keyword");
                 stopList.add(forbiddenWord);
             }
-
+            System.out.println("불용어 : " + stopList);
             return stopList;
         } catch (IOException e) {
             e.printStackTrace();
@@ -642,7 +637,7 @@ public class SearchService {
             } else {
                 return null;
             }
-
+            System.out.println("수동 추천 검색어 : " + recommendList);
             return recommendList;
         } catch (IOException e) {
             e.printStackTrace();
@@ -741,7 +736,7 @@ public class SearchService {
                 keyList.add(key + " (" + docCount + ")");
             }
         }
-
+        System.out.println("인기 검색어 : " + keyList);
 
         return keyList;
     }
@@ -788,6 +783,8 @@ public class SearchService {
             }
             // 결과 출력
             List<String> result = new ArrayList<>(uniqueItems);
+
+            System.out.println("오타교정 : " + result);
 
             return result;
 
